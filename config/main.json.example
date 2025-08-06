@@ -1,0 +1,13 @@
+{
+  "deviceAccounts": [
+    {
+      "id": "",
+      "password": ""
+    }
+  ],
+  "testAccount": {
+    "id": "",
+    "password": ""
+  },
+  "webhook": ""
+}

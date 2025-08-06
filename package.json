@@ -1,0 +1,22 @@
+{
+  "name": "ptcgpb_hl_v3",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "volta": {
+    "node": "22.2.0"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.13.4",
+    "axios": "^1.11.0",
+    "google-protobuf": "^3.21.4",
+    "inquirer": "^12.9.0",
+    "uuid": "^11.1.0"
+  }
+}

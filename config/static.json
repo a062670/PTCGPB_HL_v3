@@ -1,0 +1,37 @@
+{
+  "appInfo": {
+    "sessionId": "",
+    "appVersion": "1.3.0",
+    "sdkVersion": "Unity-3.9.0-016a4b5c812",
+    "carrier": "FarEasTone",
+    "locale": "zh-TW",
+    "timeZone": "Asia/Taipei",
+    "timeZoneOffset": 28800000,
+    "manufacturer": "samsung",
+    "deviceName": "SM-G977N",
+    "osType": "Android",
+    "osVersion": "9",
+    "networkType": "wifi"
+  },
+  "headers": {
+    "x-takasho-request-id": "",
+    "x-takasho-session-token": "",
+    "x-takasho-sdk-version": "2.0.0",
+    "x-takasho-protocol-version": "v4.0.0",
+    "x-takasho-platform": "Google",
+    "x-takasho-app-version": "1.3.0",
+    "x-takasho-build-version": "def0f1b6e6f693ef0b04d798606caa6acc0da94d",
+    "x-takasho-os": "Android",
+    "x-takasho-user-agent": "TakashoSdk/2.0.0 (Android; Android OS 9 / API-28 (PQ3A.190605.07141716/3793265); samsung SM-N960N; Application/1.3.0+def0f1b6e6f693ef0b04d798606caa6acc0da94d)",
+    "x-takasho-idempotency-key": "",
+    "x-takasho-request-asset-aladdin-hash": "dc4003425cd60fdd",
+    "x-takasho-request-master-memory-aladdin-hash": "",
+    "x-takasho-app-version-hash-key": "f5173e325d25d5b972246168be56fe1e7bcc04b181df9f489f6a9eddece51920"
+  },
+  "info": {
+    "appVersion": "1.2.0",
+    "buildVersion": "ce01b280a393def4847d37b1c7776593fa36d56c",
+    "os": "Android",
+    "platform": "Google"
+  }
+}

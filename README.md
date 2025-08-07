@@ -45,6 +45,9 @@ PTCGPB_HL_v3/
 ├── tester/                 # Interactive testing tool
 ├── generated/              # Generated files
 ├── approve.js             # Main automation script
+├── switch-account.js      # Account switching helper
+├── run-account1.bat       # Windows batch file for Account 1
+├── run-account2.bat       # Windows batch file for Account 2
 └── package.json           # Dependencies and project info
 ```
 
@@ -84,10 +87,17 @@ PTCGPB_HL_v3/
 
 ```json
 {
+  "activeAccountIndex": 0,
   "deviceAccounts": [
     {
       "id": "your_game_account_id",
-      "password": "your_game_password"
+      "password": "your_game_password",
+      "name": "Account 1"
+    },
+    {
+      "id": "your_second_account_id",
+      "password": "your_second_password",
+      "name": "Account 2"
     }
   ],
   "testAccount": {
@@ -97,6 +107,12 @@ PTCGPB_HL_v3/
   "webhook": "your_discord_webhook_url"
 }
 ```
+
+**Configuration Fields:**
+- `activeAccountIndex`: Index of the account to run (0-based)
+- `deviceAccounts`: Array of game accounts with optional `name` field for easier identification
+- `testAccount`: Account for testing purposes
+- `webhook`: Discord webhook URL for notifications
 
 ### Server Configuration (`config/server.json`)
 
@@ -133,10 +149,43 @@ node approve.js
 ```
 
 The bot will:
-1. Automatically log in to configured accounts
+1. Automatically log in to the selected account (based on `activeAccountIndex`)
 2. Monitor and approve friend requests
 3. Send notifications to Discord webhook
 4. Handle session renewals and error recovery
+
+### Account Management
+
+The bot now supports single-account operation with easy switching:
+
+#### Using Command Line
+```bash
+# List all available accounts
+node switch-account.js list
+
+# Switch to a specific account (0-based index)
+node switch-account.js 0  # Switch to first account
+node switch-account.js 1  # Switch to second account
+
+# Run the bot with the selected account
+node approve.js
+```
+
+#### Using Batch Files (Windows)
+For Windows users, you can use the provided batch files for quick account switching:
+
+```bash
+# Run Account 1
+.\run-account1.bat
+
+# Run Account 2
+.\run-account2.bat
+```
+
+The batch files will automatically:
+1. Switch to the specified account
+2. Start the bot
+3. Keep the window open for monitoring
 
 ## 🔧 Key Components
 

@@ -1,13 +1,20 @@
 {
+  "activeAccountIndex": 0,
   "deviceAccounts": [
     {
-      "id": "",
-      "password": ""
+      "id": "your_game_account_id",
+      "password": "your_game_password",
+      "name": "Account 1"
+    },
+    {
+      "id": "your_second_account_id",
+      "password": "your_second_password",
+      "name": "Account 2"
     }
   ],
   "testAccount": {
-    "id": "",
-    "password": ""
+    "id": "test_account_id",
+    "password": "test_account_password"
   },
-  "webhook": ""
+  "webhook": "your_discord_webhook_url"
 }

@@ -45,6 +45,9 @@ PTCGPB_HL_v3/
 ├── tester/                 # 互動式測試工具
 ├── generated/              # 生成的檔案
 ├── approve.js             # 主要自動化腳本
+├── switch-account.js      # 帳號切換輔助工具
+├── run-account1.bat       # Windows 批次檔案 (帳號 1)
+├── run-account2.bat       # Windows 批次檔案 (帳號 2)
 └── package.json           # 依賴項和專案資訊
 ```
 
@@ -84,10 +87,17 @@ PTCGPB_HL_v3/
 
 ```json
 {
+  "activeAccountIndex": 0,
   "deviceAccounts": [
     {
       "id": "您的遊戲帳號ID",
-      "password": "您的遊戲密碼"
+      "password": "您的遊戲密碼",
+      "name": "帳號 1"
+    },
+    {
+      "id": "您的第二個帳號ID",
+      "password": "您的第二個密碼",
+      "name": "帳號 2"
     }
   ],
   "testAccount": {
@@ -97,6 +107,12 @@ PTCGPB_HL_v3/
   "webhook": "您的discord_webhook_url"
 }
 ```
+
+**配置欄位：**
+- `activeAccountIndex`: 要運行的帳號索引（從0開始）
+- `deviceAccounts`: 遊戲帳號陣列，可選的 `name` 欄位用於更容易識別
+- `testAccount`: 用於測試的帳號
+- `webhook`: Discord webhook URL 用於通知
 
 ### 伺服器配置 (`config/server.json`)
 
@@ -133,10 +149,43 @@ node approve.js
 ```
 
 機器人將：
-1. 自動登入配置的帳號
+1. 自動登入選定的帳號（基於 `activeAccountIndex`）
 2. 監控並批准好友請求
 3. 發送通知到 Discord webhook
 4. 處理會話續期和錯誤恢復
+
+### 帳號管理
+
+機器人現在支援單帳號操作，可輕鬆切換：
+
+#### 使用命令列
+```bash
+# 列出所有可用帳號
+node switch-account.js list
+
+# 切換到特定帳號（從0開始的索引）
+node switch-account.js 0  # 切換到第一個帳號
+node switch-account.js 1  # 切換到第二個帳號
+
+# 使用選定的帳號運行機器人
+node approve.js
+```
+
+#### 使用批次檔案 (Windows)
+Windows 用戶可以使用提供的批次檔案進行快速帳號切換：
+
+```bash
+# 運行帳號 1
+.\run-account1.bat
+
+# 運行帳號 2
+.\run-account2.bat
+```
+
+批次檔案會自動：
+1. 切換到指定的帳號
+2. 啟動機器人
+3. 保持視窗開啟以便監控
 
 ## 🔧 關鍵組件
 

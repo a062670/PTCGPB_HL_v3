@@ -9,13 +9,24 @@ const mainConfig = require("./config/main.json");
 
 Grpc.setMaxRetries(1);
 
-let accounts = mainConfig.deviceAccounts.map((acc) => ({
-  ...acc,
+// Get the active account based on activeAccountIndex
+const activeAccountIndex = mainConfig.activeAccountIndex || 0;
+const activeAccount = mainConfig.deviceAccounts[activeAccountIndex];
+
+if (!activeAccount) {
+  console.error(`❌ Account index ${activeAccountIndex} not found! Available accounts: 0-${mainConfig.deviceAccounts.length - 1}`);
+  process.exit(1);
+}
+
+console.log(`🎮 Running bot for: ${activeAccount.name || `Account ${activeAccountIndex + 1}`} (ID: ${activeAccount.id.substring(0, 8)}...)`);
+
+let account = {
+  ...activeAccount,
   headers: {},
   nickname: "",
   nextLoginAt: 0,
   isLogin: false,
-}));
+};
 
 async function login(account) {
   if (!account) {
@@ -43,7 +54,7 @@ async function login(account) {
     ];
   account.nextLoginAt = Date.now() + 1000 * 60 * 50;
   account.isLogin = true;
-  console.log("👋 登入成功！", account.id);
+  console.log("👋 登入成功！", account.name || account.id);
 }
 
 async function getProfile(account) {
@@ -88,7 +99,7 @@ async function getFriendList(account) {
   }
   const friendList = await FriendClient.ListV1(account.headers);
   console.log(
-    account.id,
+    account.name || account.id,
     friendList.data.friendsList.length,
     friendList.data.receivedFriendRequestsList.length,
     friendList.data.sentFriendRequestsList.length
@@ -115,48 +126,44 @@ async function mainMenu() {
   // 1. 登入
   (async () => {
     while (1) {
-      const account = accounts.find((acc) => acc.nextLoginAt < Date.now());
-      if (!account) {
-        await sleep(1000 * 60 * 1);
-        continue;
-      }
-      try {
-        await login(account);
-        if (!account.nickname) {
-          await getProfile(account);
+      if (account.nextLoginAt < Date.now()) {
+        try {
+          await login(account);
+          if (!account.nickname) {
+            await getProfile(account);
+          }
+        } catch (error) {
+          await sendToDiscord(
+            `自動加好友: [${
+              account.nickname || account.name || account.id.substring(0, 4)
+            }] 登入失敗`
+          );
+          account.nextLoginAt = Date.now() + 1000 * 60 * 1;
+          account.isLogin = false;
         }
-      } catch (error) {
-        await sendToDiscord(
-          `自動加好友: [${
-            account.nickname || account.id.substring(0, 4)
-          }] 登入失敗`
-        );
-        account.nextLoginAt = Date.now() + 1000 * 60 * 1;
-        account.isLogin = false;
       }
       await sleep(1000 * 5);
     }
   })();
 
-  for (const account of accounts) {
-    (async () => {
-      while (1) {
-        if (!account.isLogin) {
-          await sleep(1000 * 60 * 1);
-          continue;
-        }
-        try {
-          await approveFriendRequest(account);
-        } catch (error) {
-          await sendToDiscord(`自動加好友: [${account.nickname}] 疑似搶登`);
-          // 搶登等10分鐘
-          account.nextLoginAt = Date.now() + 1000 * 60 * 10;
-          account.isLogin = false;
-        }
-        await sleep(1000 * 5);
+  // 2. 好友請求處理
+  (async () => {
+    while (1) {
+      if (!account.isLogin) {
+        await sleep(1000 * 60 * 1);
+        continue;
       }
-    })();
-  }
+      try {
+        await approveFriendRequest(account);
+      } catch (error) {
+        await sendToDiscord(`自動加好友: [${account.nickname || account.name}] 疑似搶登`);
+        // 搶登等10分鐘
+        account.nextLoginAt = Date.now() + 1000 * 60 * 10;
+        account.isLogin = false;
+      }
+      await sleep(1000 * 5);
+    }
+  })();
 }
 
 async function main() {

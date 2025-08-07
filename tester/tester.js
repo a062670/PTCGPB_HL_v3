@@ -190,6 +190,22 @@ async function approveFriendRequest() {
   console.log("👋 接受好友申請成功！");
 }
 
+async function clearFriendList() {
+  if (!headers["x-takasho-session-token"]) {
+    console.log("👋 請先登入！");
+    return;
+  }
+  const friendList = await getFriendList();
+
+  const friendIds = friendList.data.friendsList.map(
+    (friend) => friend.playerId
+  );
+  if (friendIds.length > 0) {
+    await FriendClient.DeleteV1(headers, friendIds);
+  }
+  console.log("👋 清空好友列表成功！");
+}
+
 async function getFriendList() {
   if (!headers["x-takasho-session-token"]) {
     console.log("👋 請先登入！");
@@ -240,7 +256,7 @@ async function mainMenu() {
           { name: "8. 取消好友申請", value: "8" },
           { name: "9. 拒絕好友申請", value: "9" },
           { name: "a. 接受好友申請", value: "a" },
-          { name: "b. 好友列表", value: "b" },
+          { name: "b. 清空好友列表", value: "b" },
           { name: "c. 得卡列表", value: "c" },
           { name: "q. 離開", value: "q" },
         ],
@@ -279,7 +295,7 @@ async function mainMenu() {
         await approveFriendRequest();
         break;
       case "b":
-        await getFriendList();
+        await clearFriendList();
         break;
       case "c":
         await getFeedList();

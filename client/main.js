@@ -16,6 +16,7 @@ const vuetify = createVuetify({
           primary: "#4CAF50", // 綠色
           secondary: "#81C784",
           accent: "#66BB6A",
+          gray: "#9E9E9E",
         },
       },
       light: {
@@ -23,6 +24,7 @@ const vuetify = createVuetify({
           primary: "#4CAF50", // 綠色
           secondary: "#81C784",
           accent: "#66BB6A",
+          gray: "#9E9E9E",
         },
       },
     },

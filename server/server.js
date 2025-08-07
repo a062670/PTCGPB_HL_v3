@@ -52,18 +52,70 @@ const handleSocketEvent = async (socket, eventName, handler) => {
 io.on("connection", (socket) => {
   console.log("客戶端已連接:", socket.id);
 
+  // 設置 socket 實例到 actions
+  actions.setSocket(socket);
+
   // 獲取帳號列表
   socket.on("getAccounts", async (data) => {
     console.log("收到 getAccounts 請求");
 
     await handleSocketEvent(socket, "getAccounts", () => {
-      const accounts = actions.getAccounts().map((acc) => ({
-        id: acc.id,
-        nickname: acc.nickname,
-        isLogin: acc.isLogin,
-        nextLoginAt: acc.nextLoginAt,
-      }));
+      const accounts = actions.getAccounts();
       return { accounts };
+    });
+  });
+
+  // 登入
+  socket.on("login", async (data) => {
+    console.log("收到 login 請求");
+    const account = await actions.doLogin(data.id);
+    await handleSocketEvent(socket, "login", () => {
+      return account;
+    });
+  });
+
+  // 登出
+  socket.on("logout", async (data) => {
+    console.log("收到 logout 請求");
+    const account = await actions.doLogout(data.id);
+    await handleSocketEvent(socket, "logout", () => {
+      return account;
+    });
+  });
+
+  // 加好友
+  socket.on("approve", async (data) => {
+    console.log("收到 approve 請求");
+    const account = await actions.doApprove(data.id);
+    await handleSocketEvent(socket, "approve", () => {
+      return account;
+    });
+  });
+
+  // 停止加好友
+  socket.on("stopApprove", async (data) => {
+    console.log("收到 stopApprove 請求");
+    const account = await actions.doStopApprove(data.id);
+    await handleSocketEvent(socket, "stopApprove", () => {
+      return account;
+    });
+  });
+
+  // 刪除所有好友
+  socket.on("deleteAllFriends", async (data) => {
+    console.log("收到 deleteAllFriends 請求");
+    const account = await actions.doDeleteAllFriends(data.id);
+    await handleSocketEvent(socket, "deleteAllFriends", () => {
+      return account;
+    });
+  });
+
+  // 取得得卡列表
+  socket.on("getFeedList", async (data) => {
+    console.log("收到 getFeedList 請求");
+    const feedList = await actions.doGetFeedList(data.id);
+    await handleSocketEvent(socket, "getFeedList", () => {
+      return feedList;
     });
   });
 

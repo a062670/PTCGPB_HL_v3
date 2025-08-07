@@ -2,6 +2,7 @@ class SocketApiService {
   constructor() {
     this.socket = null;
     this.isConnected = false;
+    this.eventListeners = new Map(); // 存儲事件監聽器
   }
 
   // 連接到服務器
@@ -32,7 +33,51 @@ class SocketApiService {
         this.isConnected = false;
         reject(error);
       });
+
+      // 設置通知監聽器
+      this.setupNotificationListeners();
     });
+  }
+
+  // 設置通知監聽器
+  setupNotificationListeners() {
+    // 監聽帳號更新通知
+    this.socket.on("updateAccount", (account) => {
+      console.log("收到帳號更新通知:", account);
+      this.emitEvent("updateAccount", account);
+    });
+  }
+
+  // 監聽通知事件
+  on(event, callback) {
+    if (!this.eventListeners.has(event)) {
+      this.eventListeners.set(event, []);
+    }
+    this.eventListeners.get(event).push(callback);
+  }
+
+  // 移除通知事件監聽器
+  off(event, callback) {
+    if (this.eventListeners.has(event)) {
+      const listeners = this.eventListeners.get(event);
+      const index = listeners.indexOf(callback);
+      if (index > -1) {
+        listeners.splice(index, 1);
+      }
+    }
+  }
+
+  // 發射事件給監聽器
+  emitEvent(event, data) {
+    if (this.eventListeners.has(event)) {
+      this.eventListeners.get(event).forEach((callback) => {
+        try {
+          callback(data);
+        } catch (error) {
+          console.error(`事件 ${event} 的回調函數執行錯誤:`, error);
+        }
+      });
+    }
   }
 
   // 斷開連接
@@ -85,6 +130,36 @@ class SocketApiService {
   // 帳號相關 API
   async getAccounts() {
     return this.request("getAccounts", null);
+  }
+
+  // 登入
+  async login(accountId) {
+    return this.request("login", { id: accountId });
+  }
+
+  // 登出
+  async logout(accountId) {
+    return this.request("logout", { id: accountId });
+  }
+
+  // 加好友
+  async approve(accountId) {
+    return this.request("approve", { id: accountId });
+  }
+
+  // 停止加好友
+  async stopApprove(accountId) {
+    return this.request("stopApprove", { id: accountId });
+  }
+
+  // 刪除所有好友
+  async deleteAllFriends(accountId) {
+    return this.request("deleteAllFriends", { id: accountId });
+  }
+
+  // 取得得卡列表
+  async getFeedList(accountId) {
+    return this.request("getFeedList", { id: accountId });
   }
 }
 

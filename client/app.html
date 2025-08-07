@@ -11,45 +11,83 @@
 
   <!-- Navigation Drawer (側邊欄) -->
   <v-navigation-drawer v-model="appStore.drawer" app>
-    <v-card>
-      <v-card-title>
-        帳號列表 ({{ appStore.accountsCount }})
-        <v-spacer></v-spacer>
+    <div v-for="account in appStore.accounts" :key="account.id" class="pa-2">
+      <div>{{ account.nickname }}</div>
+      <div>{{ account.id }}</div>
+      <div>{{ account.friendList }}</div>
+      <div>{{ account.lastUpdateAt }}</div>
+      <div class="d-flex ga-2 flex-wrap">
         <v-btn
-          color="primary"
-          @click="appStore.loadAccounts"
-          :loading="appStore.loading"
-          :disabled="appStore.loading"
+          v-if="account.isLogin"
+          color="info"
+          :loading="account.isLoggingIn"
+          @click="appStore.logout(account)"
         >
-          <v-icon left>mdi-refresh</v-icon>
-          重新載入
+          登出
         </v-btn>
-      </v-card-title>
-      <v-card-text>
-        <v-progress-linear
-          v-if="appStore.loading"
-          indeterminate
+        <v-btn
+          v-if="!account.isLogin"
+          color="gray"
+          :loading="account.isLoggingIn"
+          @click="appStore.login(account)"
+        >
+          登入
+        </v-btn>
+        <v-btn
+          v-if="account.isApprove"
           color="primary"
-        ></v-progress-linear>
-
-        <div v-if="!appStore.loading">
-          <p>帳號數量: {{ appStore.accounts.length }}</p>
-          <ul>
-            <li v-for="account in appStore.accounts" :key="account.id">
-              {{ account.nickname || account.id }}
-            </li>
-          </ul>
-        </div>
-      </v-card-text>
-    </v-card>
+          :loading="account.isApproving"
+          @click="appStore.stopApprove(account)"
+        >
+          停止加好友
+        </v-btn>
+        <v-btn
+          v-if="!account.isApprove"
+          color="gray"
+          :loading="account.isApproving"
+          @click="appStore.approve(account)"
+        >
+          開始加好友
+        </v-btn>
+        <v-btn
+          v-if="account.isLogin"
+          color="warning"
+          :loading="account.isDeletingFriends"
+          @click="appStore.deleteAllFriends(account)"
+        >
+          刪除所有好友
+        </v-btn>
+        <v-btn
+          v-if="account.isLogin"
+          color="info"
+          :loading="account.isGettingFeedList"
+          @click="appStore.getFeedList(account)"
+        >
+          取得得卡列表
+        </v-btn>
+      </div>
+    </div>
   </v-navigation-drawer>
 
   <!-- Main Content -->
   <v-main>
     <v-container fluid>
-      <v-row>
-        <v-col cols="12"> </v-col>
-      </v-row>
+      <div
+        class="d-flex flex-column ga-2"
+        v-if="appStore.showType === 'feedList'"
+      >
+        <div>下次更新時間: {{ appStore.feedList.renewAfter }}</div>
+        <div
+          v-for="feed in appStore.feedList.list"
+          :key="feed.someoneFeedId"
+          class="pa-2"
+          :class="{ 'border-lg border-primary border-opacity-100 rounded-xl': feed.isFriend }"
+        >
+          <div>{{ feed.nickname }}</div>
+          <div>{{ feed.cardIds }}</div>
+          <div>{{ feed.isFriend }}</div>
+        </div>
+      </div>
     </v-container>
   </v-main>
 </v-app>

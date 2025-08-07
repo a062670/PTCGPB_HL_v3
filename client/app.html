@@ -1,0 +1,55 @@
+<v-app>
+  <!-- Header -->
+  <v-app-bar app color="primary">
+    <v-app-bar-nav-icon @click="appStore.toggleDrawer"></v-app-bar-nav-icon>
+    <v-toolbar-title>{{ appStore.title }}</v-toolbar-title>
+    <v-spacer></v-spacer>
+    <v-btn icon @click="toggleTheme">
+      <v-icon>{{ themeStore.themeIcon }}</v-icon>
+    </v-btn>
+  </v-app-bar>
+
+  <!-- Navigation Drawer (側邊欄) -->
+  <v-navigation-drawer v-model="appStore.drawer" app>
+    <v-card>
+      <v-card-title>
+        帳號列表 ({{ appStore.accountsCount }})
+        <v-spacer></v-spacer>
+        <v-btn
+          color="primary"
+          @click="appStore.loadAccounts"
+          :loading="appStore.loading"
+          :disabled="appStore.loading"
+        >
+          <v-icon left>mdi-refresh</v-icon>
+          重新載入
+        </v-btn>
+      </v-card-title>
+      <v-card-text>
+        <v-progress-linear
+          v-if="appStore.loading"
+          indeterminate
+          color="primary"
+        ></v-progress-linear>
+
+        <div v-if="!appStore.loading">
+          <p>帳號數量: {{ appStore.accounts.length }}</p>
+          <ul>
+            <li v-for="account in appStore.accounts" :key="account.id">
+              {{ account.nickname || account.id }}
+            </li>
+          </ul>
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-navigation-drawer>
+
+  <!-- Main Content -->
+  <v-main>
+    <v-container fluid>
+      <v-row>
+        <v-col cols="12"> </v-col>
+      </v-row>
+    </v-container>
+  </v-main>
+</v-app>

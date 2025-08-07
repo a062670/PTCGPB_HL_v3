@@ -45,9 +45,13 @@ PTCGPB_HL_v3/
 ├── tester/                 # Interactive testing tool
 ├── generated/              # Generated files
 ├── approve.js             # Main automation script
-├── switch-account.js      # Account switching helper
-├── run-account1.bat       # Windows batch file for Account 1
-├── run-account2.bat       # Windows batch file for Account 2
+├── scripts/               # Utility scripts
+│   ├── switch-account.js  # Account switching helper
+│   └── list-accounts.js   # Account listing utility
+├── batch/                 # Windows batch files
+│   ├── run-account1.bat   # Batch file for Account 1
+│   ├── run-account2.bat   # Batch file for Account 2
+│   └── run-all-accounts.bat # Batch file for all accounts
 └── package.json           # Dependencies and project info
 ```
 
@@ -161,11 +165,11 @@ The bot now supports single-account operation with easy switching:
 #### Using Command Line
 ```bash
 # List all available accounts
-node switch-account.js list
+node scripts/switch-account.js list
 
 # Switch to a specific account (0-based index)
-node switch-account.js 0  # Switch to first account
-node switch-account.js 1  # Switch to second account
+node scripts/switch-account.js 0  # Switch to first account
+node scripts/switch-account.js 1  # Switch to second account
 
 # Run the bot with the selected account
 node approve.js
@@ -176,16 +180,21 @@ For Windows users, you can use the provided batch files for quick account switch
 
 ```bash
 # Run Account 1
-.\run-account1.bat
+.\batch\run-account1.bat
 
 # Run Account 2
-.\run-account2.bat
+.\batch\run-account2.bat
+
+# Run ALL accounts simultaneously
+.\batch\run-all-accounts.bat
 ```
 
 The batch files will automatically:
-1. Switch to the specified account
+1. Switch to the specified account (or load all accounts)
 2. Start the bot
 3. Keep the window open for monitoring
+
+**Note**: The `run-all-accounts.bat` runs all accounts simultaneously, which may be resource-intensive.
 
 ## 🔧 Key Components
 

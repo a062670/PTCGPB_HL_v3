@@ -9,25 +9,10 @@ const mainConfig = require("./config/main.json");
 
 Grpc.setMaxRetries(1);
 
-// Get the active account based on activeAccountIndex
-const activeAccountIndex = mainConfig.activeAccountIndex || 0;
-const activeAccount = mainConfig.deviceAccounts[activeAccountIndex];
+// Check if running in multi-account mode
+const isMultiAccountMode = process.argv.includes('--all') || process.argv.includes('-a');
 
-if (!activeAccount) {
-  console.error(`❌ Account index ${activeAccountIndex} not found! Available accounts: 0-${mainConfig.deviceAccounts.length - 1}`);
-  process.exit(1);
-}
-
-console.log(`🎮 Running bot for: ${activeAccount.name || `Account ${activeAccountIndex + 1}`} (ID: ${activeAccount.id.substring(0, 8)}...)`);
-
-let account = {
-  ...activeAccount,
-  headers: {},
-  nickname: "",
-  nextLoginAt: 0,
-  isLogin: false,
-};
-
+// Common functions used by both single and multi-account modes
 async function login(account) {
   if (!account) {
     console.log("👋 沒有帳號！");
@@ -122,11 +107,56 @@ async function sendToDiscord(message) {
   });
 }
 
+// Initialize accounts based on mode
+let accounts = [];
+
+if (isMultiAccountMode) {
+  console.log("🎮 Running bot in MULTI-ACCOUNT mode for all accounts...");
+  
+  accounts = mainConfig.deviceAccounts.map((acc) => ({
+    ...acc,
+    headers: {},
+    nickname: "",
+    nextLoginAt: 0,
+    isLogin: false,
+  }));
+
+  console.log(`📋 Loaded ${accounts.length} accounts:`);
+  accounts.forEach((acc, index) => {
+    console.log(`  ${index}: ${acc.name || `Account ${index + 1}`} (ID: ${acc.id.substring(0, 8)}...)`);
+  });
+} else {
+  // Single account mode
+  const activeAccountIndex = mainConfig.activeAccountIndex || 0;
+  const activeAccount = mainConfig.deviceAccounts[activeAccountIndex];
+
+  if (!activeAccount) {
+    console.error(`❌ Account index ${activeAccountIndex} not found! Available accounts: 0-${mainConfig.deviceAccounts.length - 1}`);
+    process.exit(1);
+  }
+
+  console.log(`🎮 Running bot for: ${activeAccount.name || `Account ${activeAccountIndex + 1}`} (ID: ${activeAccount.id.substring(0, 8)}...)`);
+
+  accounts = [{
+    ...activeAccount,
+    headers: {},
+    nickname: "",
+    nextLoginAt: 0,
+    isLogin: false,
+  }];
+}
+
+// Main menu function that works for both modes
 async function mainMenu() {
-  // 1. 登入
-  (async () => {
-    while (1) {
-      if (account.nextLoginAt < Date.now()) {
+  if (isMultiAccountMode) {
+    // Multi-account login management
+    (async () => {
+      while (1) {
+        const account = accounts.find((acc) => acc.nextLoginAt < Date.now());
+        if (!account) {
+          await sleep(1000 * 60 * 1);
+          continue;
+        }
         try {
           await login(account);
           if (!account.nickname) {
@@ -141,32 +171,80 @@ async function mainMenu() {
           account.nextLoginAt = Date.now() + 1000 * 60 * 1;
           account.isLogin = false;
         }
+        await sleep(1000 * 5);
       }
-      await sleep(1000 * 5);
-    }
-  })();
+    })();
 
-  // 2. 好友請求處理
-  (async () => {
-    while (1) {
-      if (!account.isLogin) {
-        await sleep(1000 * 60 * 1);
-        continue;
-      }
-      try {
-        await approveFriendRequest(account);
-      } catch (error) {
-        await sendToDiscord(`自動加好友: [${account.nickname || account.name}] 疑似搶登`);
-        // 搶登等10分鐘
-        account.nextLoginAt = Date.now() + 1000 * 60 * 10;
-        account.isLogin = false;
-      }
-      await sleep(1000 * 5);
+    // Multi-account friend request processing
+    for (const account of accounts) {
+      (async () => {
+        while (1) {
+          if (!account.isLogin) {
+            await sleep(1000 * 60 * 1);
+            continue;
+          }
+          try {
+            await approveFriendRequest(account);
+          } catch (error) {
+            await sendToDiscord(`自動加好友: [${account.nickname || account.name}] 疑似搶登`);
+            // 搶登等10分鐘
+            account.nextLoginAt = Date.now() + 1000 * 60 * 10;
+            account.isLogin = false;
+          }
+          await sleep(1000 * 5);
+        }
+      })();
     }
-  })();
+  } else {
+    // Single account mode - simpler logic
+    const account = accounts[0];
+    
+    // 1. 登入
+    (async () => {
+      while (1) {
+        if (account.nextLoginAt < Date.now()) {
+          try {
+            await login(account);
+            if (!account.nickname) {
+              await getProfile(account);
+            }
+          } catch (error) {
+            await sendToDiscord(
+              `自動加好友: [${
+                account.nickname || account.name || account.id.substring(0, 4)
+              }] 登入失敗`
+            );
+            account.nextLoginAt = Date.now() + 1000 * 60 * 1;
+            account.isLogin = false;
+          }
+        }
+        await sleep(1000 * 5);
+      }
+    })();
+
+    // 2. 好友請求處理
+    (async () => {
+      while (1) {
+        if (!account.isLogin) {
+          await sleep(1000 * 60 * 1);
+          continue;
+        }
+        try {
+          await approveFriendRequest(account);
+        } catch (error) {
+          await sendToDiscord(`自動加好友: [${account.nickname || account.name}] 疑似搶登`);
+          // 搶登等10分鐘
+          account.nextLoginAt = Date.now() + 1000 * 60 * 10;
+          account.isLogin = false;
+        }
+        await sleep(1000 * 5);
+      }
+    })();
+  }
 }
 
 async function main() {
   await mainMenu();
 }
+
 main();

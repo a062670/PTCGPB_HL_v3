@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PTCGPB_HL_v3</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100dvh;
+        background-color: #000;
+        color: #fff;
+        font-size: 16px;
+      }
+      #box {
+        width: 300px;
+        background-color: #333;
+        border-radius: 10px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      input {
+        background-color: #333;
+        border-radius: 10px;
+        padding: 10px;
+        color: #fff;
+      }
+      button {
+        background-color: #333;
+        border-radius: 10px;
+        padding: 10px;
+        color: #999;
+      }
+    </style>
+  </head>
+  <body>
+    <form id="box" onsubmit="login(event)">
+      <input type="text" id="username" placeholder="username" />
+      <input type="password" id="password" placeholder="password" />
+      <button type="submit">login</button>
+    </form>
+
+    <script>
+      function login(event) {
+        event.preventDefault();
+        console.log("login");
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        fetch("/api/login", {
+          method: "POST",
+          body: JSON.stringify({ username, password }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }).then((res) => {
+          if (res.ok) {
+            window.location.href = "/";
+          } else {
+            alert("login failed");
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -17,6 +17,7 @@
     "@grpc/grpc-js": "^1.13.4",
     "axios": "^1.11.0",
     "express": "^5.1.0",
+    "express-session": "^1.18.2",
     "google-protobuf": "^3.21.4",
     "inquirer": "^12.9.0",
     "open": "^8.4.2",

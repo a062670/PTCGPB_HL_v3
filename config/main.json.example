@@ -9,5 +9,11 @@
     "id": "",
     "password": ""
   },
+  "auth": {
+    "enable": false,
+    "username": "aaa",
+    "password": "sss",
+    "secret": "06f69b107f927f9b1240a36033f6c8af"
+  },
   "webhook": ""
 }

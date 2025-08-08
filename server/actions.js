@@ -10,16 +10,14 @@ const OpenPack = require("../steps/OpenPack.js");
 const FeedClient = require("../steps/FeedClient.js");
 const FriendClient = require("../steps/FriendClient.js");
 
+const mainConfig = require("../config/main.json");
+
 Grpc.setMaxRetries(1);
 
-let mainConfig;
 let accounts;
 let socketInstance = null; // 用於存儲 socket 實例
 
-exports.reloadConfig = () => {
-  mainConfig = JSON.parse(
-    fs.readFileSync(path.join(__dirname, "..", "config", "main.json"), "utf8")
-  );
+exports.init = () => {
   accounts = mainConfig.deviceAccounts.map((acc) => ({
     ...acc,
     headers: {},

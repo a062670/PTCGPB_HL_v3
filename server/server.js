@@ -1,22 +1,63 @@
 const express = require("express");
+const session = require("express-session");
 const open = require("open");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const actions = require("./actions");
 
-actions.reloadConfig();
+const mainConfig = require("../config/main.json");
+
+actions.init();
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
+  // 同源請求，不需要 CORS 配置
 });
 
+// 根據配置決定是否啟用 session
+let sessionMiddleware = null;
+if (mainConfig.auth?.enable) {
+  sessionMiddleware = session({
+    secret: mainConfig.auth.secret,
+    resave: false,
+    saveUninitialized: false,
+  });
+
+  app.use(sessionMiddleware);
+}
+
+// 驗證中間件
+const authMiddleware = (req, res, next) => {
+  if (
+    !mainConfig.auth?.enable ||
+    req.path === "/login.html" ||
+    req.session?.authenticated
+  ) {
+    next();
+  } else {
+    res.redirect("/login.html");
+  }
+};
+
 app.use(express.json());
-app.use(express.static("client"));
+
+// 登入 API
+app.post("/api/login", (req, res) => {
+  const { username, password } = req.body;
+  if (
+    username === mainConfig.auth?.username &&
+    password === mainConfig.auth?.password
+  ) {
+    req.session.authenticated = true;
+    res.json({ code: 0, message: "success" });
+  } else {
+    res.status(401).json({ code: 401, message: "error" });
+  }
+});
+
+// 靜態資源
+app.use("/", authMiddleware, express.static("client"));
 
 // 共用函數：發送成功回應
 const sendSuccessResponse = (socket, eventName, data) => {
@@ -47,6 +88,25 @@ const handleSocketEvent = async (socket, eventName, handler) => {
     sendErrorResponse(socket, eventName, error);
   }
 };
+
+// 根據配置決定是否啟用 Socket.IO 驗證
+if (mainConfig.auth?.enable && sessionMiddleware) {
+  // 將 session 中間件應用到 Socket.IO
+  io.use((socket, next) => {
+    sessionMiddleware(socket.request, {}, next);
+  });
+
+  // Socket.IO 驗證
+  io.use((socket, next) => {
+    const session = socket.request.session;
+    console.log("Socket session:", session);
+    if (session && session.authenticated) {
+      next();
+    } else {
+      next(new Error("Authentication required"));
+    }
+  });
+}
 
 // Socket.io 事件處理
 io.on("connection", (socket) => {

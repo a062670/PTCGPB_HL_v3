@@ -12,7 +12,7 @@ class SocketApiService {
     }
 
     return new Promise((resolve, reject) => {
-      this.socket = io("http://localhost:9487", {
+      this.socket = io({
         transports: ["websocket", "polling"],
         timeout: 10000,
       });
@@ -31,7 +31,13 @@ class SocketApiService {
       this.socket.on("connect_error", (error) => {
         console.error("Socket.io連接錯誤:", error);
         this.isConnected = false;
-        reject(error);
+
+        // 如果是認證錯誤，重定向到登入頁面
+        if (error.message === "Authentication required") {
+          window.location.href = "/login.html";
+        } else {
+          reject(error);
+        }
       });
 
       // 設置通知監聽器

@@ -249,28 +249,41 @@ function filterAccount(account) {
 
 // 排程
 function schedule() {
+  // 全域未處理的 Promise 拒絕處理
+  process.on("unhandledRejection", (reason, promise) => {
+    console.error("未處理的 Promise 拒絕:", reason);
+    console.error("Promise:", promise);
+  });
+
+  // 登入排程
   (async () => {
     while (1) {
-      const account = accounts.find((acc) => acc.nextLoginAt < Date.now());
-      if (!account) {
-        await sleep(1000 * 60 * 1);
-        continue;
-      }
       try {
-        await login(account);
-        if (!account.nickname) {
-          await getProfile(account);
+        const account = accounts.find((acc) => acc.nextLoginAt < Date.now());
+        if (!account) {
+          await sleep(1000 * 60 * 1);
+          continue;
         }
+        try {
+          await login(account);
+          if (!account.nickname) {
+            await getProfile(account);
+          }
+        } catch (error) {
+          console.error(`登入錯誤 [${account.id}]:`, error.message);
+          await sendToDiscord(
+            `自動加好友: [${
+              account.nickname || account.id.substring(0, 4)
+            }] 登入失敗`
+          );
+          account.nextLoginAt = Date.now() + 1000 * 60 * 1;
+          account.isLogin = false;
+        }
+        await sleep(1000 * 5);
       } catch (error) {
-        await sendToDiscord(
-          `自動加好友: [${
-            account.nickname || account.id.substring(0, 4)
-          }] 登入失敗`
-        );
-        account.nextLoginAt = Date.now() + 1000 * 60 * 1;
-        account.isLogin = false;
+        console.error("登入排程發生未預期錯誤:", error);
+        await sleep(1000 * 60 * 5); // 發生錯誤時等待5分鐘
       }
-      await sleep(1000 * 5);
     }
   })();
 
@@ -278,21 +291,30 @@ function schedule() {
   for (const account of accounts) {
     (async () => {
       while (1) {
-        if (!account.isLogin || !account.isApprove) {
-          await sleep(1000 * 5);
-          continue;
-        }
         try {
-          await approveFriendRequest(account);
+          if (!account.isLogin || !account.isApprove) {
+            await sleep(1000 * 5);
+            continue;
+          }
+          try {
+            await approveFriendRequest(account);
+          } catch (error) {
+            console.error(`加好友錯誤 [${account.id}]:`, error.message);
+            await sendToDiscord(`自動加好友: [${account.nickname}] 疑似搶登`);
+            // 搶登等10分鐘
+            account.nextLoginAt = Date.now() + 1000 * 60 * 10;
+            account.isLogin = false;
+            // 通知 socket
+            emitToSocket("updateAccount", filterAccount(account));
+          }
+          await sleep(1000 * 5);
         } catch (error) {
-          await sendToDiscord(`自動加好友: [${account.nickname}] 疑似搶登`);
-          // 搶登等10分鐘
-          account.nextLoginAt = Date.now() + 1000 * 60 * 10;
-          account.isLogin = false;
-          // 通知 socket
-          emitToSocket("updateAccount", filterAccount(account));
+          console.error(
+            `帳號 [${account.id}] 加好友排程發生未預期錯誤:`,
+            error
+          );
+          await sleep(1000 * 60 * 5); // 發生錯誤時等待5分鐘
         }
-        await sleep(1000 * 5);
       }
     })();
   }

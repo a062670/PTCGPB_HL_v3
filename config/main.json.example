@@ -5,6 +5,7 @@
       "password": ""
     }
   ],
+  "reLoginWaitTime": 10,
   "testAccount": {
     "id": "",
     "password": ""

@@ -369,7 +369,8 @@ function schedule() {
             console.error(`加好友錯誤 [${account.id}]:`, error.message);
             await sendToDiscord(`自動加好友: [${account.nickname}] 疑似搶登`);
             // 搶登等10分鐘
-            account.nextLoginAt = Date.now() + 1000 * 60 * 10;
+            account.nextLoginAt =
+              Date.now() + 1000 * 60 * (mainConfig.reLoginWaitTime || 10);
             account.isLogin = false;
             // 通知 socket
             emitToSocket("updateAccount", filterAccount(account));

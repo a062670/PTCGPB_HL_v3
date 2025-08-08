@@ -1,5 +1,6 @@
 import { useAppStore } from "./stores/app.js";
 import { useThemeStore } from "./stores/theme.js";
+import { usePresentBoxStore } from "./stores/presentBox.js";
 import toastService from "./toast.js";
 
 const { ref, createApp, onMounted, computed } = Vue;
@@ -45,6 +46,7 @@ async function loadTemplate() {
       // 使用 Stores
       const appStore = useAppStore();
       const themeStore = useThemeStore();
+      const presentBoxStore = usePresentBoxStore();
       const theme = useTheme();
 
       // 主題切換功能
@@ -64,6 +66,7 @@ async function loadTemplate() {
       return {
         appStore,
         themeStore,
+        presentBoxStore,
         toggleTheme,
       };
     },

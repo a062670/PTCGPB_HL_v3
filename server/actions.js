@@ -9,6 +9,7 @@ const PlayerProfileClient = require("../steps/PlayerProfileClient.js");
 const OpenPack = require("../steps/OpenPack.js");
 const FeedClient = require("../steps/FeedClient.js");
 const FriendClient = require("../steps/FriendClient.js");
+const PresentBoxClient = require("../steps/PresentBoxClient.js");
 
 const mainConfig = require("../config/main.json");
 
@@ -101,6 +102,22 @@ exports.doGetFeedList = async (accountId) => {
     throw new Error("account not found");
   }
   return await getFeedList(account);
+};
+
+exports.doGetPresentBoxList = async (accountId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  return await getPresentBoxList(account);
+};
+
+exports.doReceivePresentBox = async (accountId, presentBoxIds) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  return await receivePresentBox(account, presentBoxIds);
 };
 
 // 發送 socket 通知的輔助函數
@@ -218,6 +235,56 @@ async function getFeedList(account) {
     list,
     renewAfter,
   };
+}
+
+async function getPresentBoxList(account) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const presentBoxList = await PresentBoxClient.ListV1(account.headers);
+  presentBoxList.data.presentsList.forEach((present) => {
+    console.log("presentId:", present.presentId);
+    console.log(
+      "expiredAt:",
+      new Date(present.expiredAt.seconds * 1000).toLocaleString()
+    );
+    console.log("pack:", present.pack);
+    console.log("currency:", present.currency);
+    console.log("--------------------------------");
+  });
+  return presentBoxList.data;
+}
+
+async function receivePresentBox(account, presentBoxIds) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  if (!presentBoxIds) {
+    throw new Error("請輸入禮物 IDs！");
+  }
+  const receivePresentBoxResponse = await PresentBoxClient.ReceiveV1(
+    account.headers,
+    presentBoxIds
+  );
+  if (receivePresentBoxResponse.data.result) {
+    const result = receivePresentBoxResponse.data.result;
+    console.log("isSuccesse:", result.isSuccesse);
+    if (result.itemAcquisitionResult?.acquiredItems?.cardInstancesList) {
+      result.itemAcquisitionResult.acquiredItems.cardInstancesList.forEach(
+        (card) => {
+          console.log("cardId:", card.cardInstance.cardId);
+        }
+      );
+    }
+  }
+  if (receivePresentBoxResponse.data.resultsList) {
+    receivePresentBoxResponse.data.resultsList.forEach((result) => {
+      console.log("presentId:", result.presentId);
+      console.log("isSuccesse:", result.isSuccesse);
+      console.log("--------------------------------");
+    });
+  }
+  return receivePresentBoxResponse.data;
 }
 
 async function sendToDiscord(message) {

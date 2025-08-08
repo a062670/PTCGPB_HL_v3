@@ -167,6 +167,16 @@ class SocketApiService {
   async getFeedList(accountId) {
     return this.request("getFeedList", { id: accountId });
   }
+
+  // 取得禮物盒
+  async getPresentBoxList(accountId) {
+    return this.request("getPresentBoxList", { id: accountId });
+  }
+
+  // 領取禮物
+  async receivePresentBox(accountId, presentBoxIds) {
+    return this.request("receivePresentBox", { id: accountId, presentBoxIds });
+  }
 }
 
 // 建立全域 Socket API 服務實例

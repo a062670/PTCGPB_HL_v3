@@ -61,9 +61,27 @@
           v-if="account.isLogin"
           color="info"
           :loading="account.isGettingFeedList"
-          @click="appStore.getFeedList(account)"
+          @click="
+            appStore.showType = 'feedList';
+            appStore.clearFeedList();
+            appStore.selectAccount(account);
+            appStore.getFeedList(account);
+          "
         >
           取得得卡列表
+        </v-btn>
+        <v-btn
+          v-if="account.isLogin"
+          color="info"
+          :loading="account.isGettingPresentBoxList"
+          @click="
+            appStore.showType = 'presentBoxList';
+            presentBoxStore.clearPresentBoxList();
+            appStore.selectAccount(account);
+            presentBoxStore.getPresentBoxList(account);
+          "
+        >
+          取得禮物盒
         </v-btn>
       </div>
     </div>
@@ -72,6 +90,14 @@
   <!-- Main Content -->
   <v-main>
     <v-container fluid>
+      <!-- 目前帳號 -->
+      <div v-if="appStore.selectedAccount">
+        <div>
+          目前帳號: {{ appStore.selectedAccount.nickname ||
+          appStore.selectedAccount.id }}
+        </div>
+      </div>
+      <!-- 得卡 -->
       <div
         class="d-flex flex-column ga-2"
         v-if="appStore.showType === 'feedList'"
@@ -86,6 +112,81 @@
           <div>{{ feed.nickname }}</div>
           <div>{{ feed.cardIds }}</div>
           <div>{{ feed.isFriend }}</div>
+        </div>
+      </div>
+      <!-- 禮物盒 -->
+      <div v-if="appStore.showType === 'presentBoxList'">
+        <div>
+          禮物盒
+          <v-btn
+            color="primary"
+            :loading="presentBoxStore.isReceivingPresentBox"
+            @click="
+              presentBoxStore.clearReceivePresentBoxResult();
+              presentBoxStore.receivePresentBox(
+                appStore.selectedAccount,
+                presentBoxStore.canBatchReceivePresentBoxList
+              )
+            "
+          >
+            領取所有
+          </v-btn>
+        </div>
+        <div
+          v-for="presentBox in presentBoxStore.presentBoxList"
+          :key="presentBox.presentId"
+          class="pa-2 d-flex ga-2 align-center"
+        >
+          <div v-if="presentBox.currency?.type === 3">商店票</div>
+          <div v-else-if="presentBox.pack">是個包</div>
+          <div v-else>不知道是什麼</div>
+          <div>
+            到期時間:
+            <span> {{ presentBox.expiredAt }} </span>
+          </div>
+          <div>
+            <v-btn
+              color="primary"
+              :loading="presentBoxStore.isReceivingPresentBox"
+              @click="
+                presentBoxStore.clearReceivePresentBoxResult();
+                presentBoxStore.receivePresentBox(
+                  appStore.selectedAccount,
+                  [presentBox.presentId]
+                )
+              "
+            >
+              領取
+            </v-btn>
+          </div>
+        </div>
+        <div>領取結果</div>
+        <div v-if="presentBoxStore.receivePresentBoxResult.result" class="pa-2">
+          <div>
+            領取結果:
+            <span>
+              {{ presentBoxStore.receivePresentBoxResult.result.isSuccesse }}
+            </span>
+          </div>
+          <div
+            v-if="presentBoxStore.receivePresentBoxResult.result.itemAcquisitionResult?.acquiredItems?.cardInstancesList"
+          >
+            <img
+              v-for="cardInstance in presentBoxStore.receivePresentBoxResult.result.itemAcquisitionResult.acquiredItems.cardInstancesList"
+              :src="`https://car-fs.gagu.dev/PackViewer/images/${cardInstance.cardInstance.cardId}.png`"
+              width="100"
+            />
+          </div>
+        </div>
+        <div v-if="presentBoxStore.receivePresentBoxResult.resultsList">
+          <div
+            v-for="result in presentBoxStore.receivePresentBoxResult.resultsList"
+            :key="result.presentId"
+            class="pa-2"
+          >
+            <div>presentId: {{ result.presentId }}</div>
+            <div>isSuccesse: {{ result.isSuccesse }}</div>
+          </div>
         </div>
       </div>
     </v-container>

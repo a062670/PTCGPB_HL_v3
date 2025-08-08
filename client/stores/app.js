@@ -13,11 +13,20 @@ export const useAppStore = defineStore("app", () => {
 
   // 帳號相關狀態
   const accounts = ref([]);
-  const selectedAccount = ref(null);
+  const selectedAccountId = ref(null);
 
   // 資料相關
   const showType = ref("feedList");
   const feedList = ref({});
+
+  // 計算屬性
+  const selectedAccount = computed(() => {
+    return (
+      accounts.value.find(
+        (account) => account.id === selectedAccountId.value
+      ) || null
+    );
+  });
 
   // 設置通知監聽器
   const setupNotificationListeners = () => {
@@ -58,6 +67,7 @@ export const useAppStore = defineStore("app", () => {
         isApproving: false,
         isDeletingFriends: false,
         isGettingFeedList: false,
+        isGettingPresentBoxList: false,
         lastUpdateAt: new Date().toLocaleString(),
       }));
 
@@ -118,12 +128,16 @@ export const useAppStore = defineStore("app", () => {
     account.isGettingFeedList = false;
   };
 
+  const clearFeedList = () => {
+    feedList.value = {};
+  };
+
   const selectAccount = (account) => {
-    selectedAccount.value = account;
+    selectedAccountId.value = account.id;
   };
 
   const clearSelectedAccount = () => {
-    selectedAccount.value = null;
+    selectedAccountId.value = null;
   };
 
   const updateAccount = (account, newAccount) => {
@@ -140,9 +154,12 @@ export const useAppStore = defineStore("app", () => {
     drawer,
     loading,
     accounts,
-    selectedAccount,
+    selectedAccountId,
     showType,
     feedList,
+
+    // 計算屬性
+    selectedAccount,
 
     // Actions
     toggleDrawer,
@@ -154,6 +171,7 @@ export const useAppStore = defineStore("app", () => {
     stopApprove,
     deleteAllFriends,
     getFeedList,
+    clearFeedList,
     selectAccount,
     clearSelectedAccount,
   };

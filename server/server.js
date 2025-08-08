@@ -179,6 +179,27 @@ io.on("connection", (socket) => {
     });
   });
 
+  // 取得禮物列表
+  socket.on("getPresentBoxList", async (data) => {
+    console.log("收到 getPresentBoxList 請求");
+    const presentBoxList = await actions.doGetPresentBoxList(data.id);
+    await handleSocketEvent(socket, "getPresentBoxList", () => {
+      return presentBoxList;
+    });
+  });
+
+  // 領取禮物
+  socket.on("receivePresentBox", async (data) => {
+    console.log("收到 receivePresentBox 請求");
+    const receivePresentBox = await actions.doReceivePresentBox(
+      data.id,
+      data.presentBoxIds
+    );
+    await handleSocketEvent(socket, "receivePresentBox", () => {
+      return receivePresentBox;
+    });
+  });
+
   // 斷線處理
   socket.on("disconnect", () => {
     console.log("客戶端已斷線:", socket.id);

@@ -280,6 +280,29 @@ io.on("connection", (socket) => {
     });
   });
 
+  // 取得開包力
+  socket.on("getPackPower", async (data) => {
+    console.log("收到 getPackPower 請求");
+    const packPower = await actions.doGetPackPower(data.id);
+    await handleSocketEvent(socket, "getPackPower", () => {
+      return packPower;
+    });
+  });
+
+  // 開包
+  socket.on("openPack", async (data) => {
+    console.log("收到 openPack 請求");
+    const openPack = await actions.doOpenPack(
+      data.id,
+      data.packId,
+      data.productId,
+      data.packPowerType
+    );
+    await handleSocketEvent(socket, "openPack", () => {
+      return openPack;
+    });
+  });
+
   // 斷線處理
   socket.on("disconnect", () => {
     console.log("客戶端已斷線:", socket.id);

@@ -10,7 +10,8 @@ const PurchaseV2 = async (
   headers,
   packConsistentToken,
   productId,
-  chargersAmount
+  chargersAmount,
+  packPowerType = "PACK_POWER_NORMAL"
 ) => {
   const request =
     new PackShopPurchaseV2Proto.PackShopPurchaseV2.Types.Request();
@@ -35,7 +36,7 @@ const PurchaseV2 = async (
   request.setHealItems(healItems);
 
   const usePowers = new PackPowerToUseProto.PackPowerToUse();
-  usePowers.setPowerId("PACK_POWER_NORMAL");
+  usePowers.setPowerId(packPowerType);
   usePowers.setAmount(1);
   request.setUsePowersList([usePowers]);
 

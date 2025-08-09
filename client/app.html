@@ -55,7 +55,7 @@
           :loading="account.isDeletingFriends"
           @click="appStore.deleteAllFriends(account)"
         >
-          刪除所有好友
+          刪除好友
         </v-btn>
         <v-btn
           v-if="account.isLogin"
@@ -68,7 +68,7 @@
             feedStore.getFeedList(account);
           "
         >
-          取得得卡列表
+          得卡列表
         </v-btn>
         <v-btn
           v-if="account.isLogin"
@@ -81,7 +81,7 @@
             presentBoxStore.getPresentBoxList(account);
           "
         >
-          取得禮物盒
+          禮物盒
         </v-btn>
         <v-btn
           v-if="account.isLogin"
@@ -95,6 +95,19 @@
           "
         >
           活動戰鬥
+        </v-btn>
+        <v-btn
+          v-if="account.isLogin"
+          color="info"
+          :loading="packStore.isGettingPackPower"
+          @click="
+            appStore.showType = 'pack';
+            packStore.clearAll();
+            appStore.selectAccount(account);
+            packStore.getPackPower(account);
+          "
+        >
+          開包
         </v-btn>
       </div>
     </div>
@@ -345,6 +358,48 @@
             >
               {{ eventId }}
             </v-btn>
+          </div>
+        </div>
+      </div>
+      <!-- 開包 -->
+      <div v-if="appStore.showType === 'pack'">
+        <div>開包</div>
+        <div v-if="packStore.packPower">
+          <div
+            v-for="packPower in packStore.packPower.packPower.packPowersList"
+            :key="packPower.packPowerId"
+            class="d-flex ga-2 align-center"
+          >
+            <div>
+              {{ packPower.packPowerId === 'PACK_POWER_PREMIUM' ? '尊貴' :
+              '普通' }}開包力: {{ packPower.amount }}
+            </div>
+            <div>自動回復: {{ packPower.nextAutoHealedAt }}</div>
+          </div>
+          <div
+            v-if="packStore.packPower.packPower.amount >= 1"
+            class="d-flex ga-2 align-center flex-wrap"
+          >
+            <v-btn
+              v-for="pack in packStore.packPower.pack"
+              :key="pack.packId"
+              color="primary"
+              :loading="packStore.isOpeningPack"
+              @click="packStore.openPack(appStore.selectedAccount, pack.packId, pack.productId)"
+            >
+              {{ pack.label }}
+            </v-btn>
+          </div>
+        </div>
+        <div v-if="packStore.openPackResult">
+          <div>開包結果</div>
+          <div class="d-flex ga-2 mt-2 align-center">
+            <img
+              v-for="card in packStore.openPackResult.cardsList"
+              :key="card.cardId"
+              :src="`https://car-fs.gagu.dev/PackViewer/images/${card.cardInstance.cardId}.png`"
+              width="100"
+            />
           </div>
         </div>
       </div>

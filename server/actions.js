@@ -12,9 +12,11 @@ const FriendClient = require("../steps/FriendClient.js");
 const PresentBoxClient = require("../steps/PresentBoxClient.js");
 const DeckClient = require("../steps/DeckClient.js");
 const SoloBattleClient = require("../steps/SoloBattleClient.js");
+const PackClient = require("../steps/PackClient.js");
 
 const mainConfig = require("../config/main.json");
 const eventBattleConfig = require("../config/eventBattle.json");
+const packConfig = require("../config/pack.json");
 
 Grpc.setMaxRetries(1);
 
@@ -196,6 +198,28 @@ exports.doFinishEventBattle = async (accountId, battleId, myDeckId, token) => {
   }
   await finishEventBattle(account, battleId, myDeckId, token);
   return;
+};
+
+/** 取得開包力 */
+exports.doGetPackPower = async (accountId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  const packPower = await getPackPower(account);
+  return {
+    packPower,
+    pack: packConfig,
+  };
+};
+
+/** 開包 */
+exports.doOpenPack = async (accountId, packId, productId, packPowerType) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  return await openPack(account, packId, productId, packPowerType);
 };
 
 // 發送 socket 通知的輔助函數
@@ -448,6 +472,29 @@ async function finishEventBattle(account, battleId, myDeckId, token) {
     token
   );
   return;
+}
+
+/** 取得開包力 */
+async function getPackPower(account) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const packPower = await PackClient.GetPackPowerV1(account.headers);
+  return packPower.data;
+}
+
+/** 開包 */
+async function openPack(account, packId, productId, packPowerType) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const openPackResponse = await OpenPack.openPack(
+    account.headers,
+    packId,
+    productId,
+    packPowerType
+  );
+  return openPackResponse;
 }
 
 async function sendToDiscord(message) {

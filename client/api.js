@@ -229,6 +229,21 @@ class SocketApiService {
       token,
     });
   }
+
+  // 取得開包力
+  async getPackPower(accountId) {
+    return this.request("getPackPower", { id: accountId });
+  }
+
+  // 開包
+  async openPack(accountId, packId, productId, packPowerType) {
+    return this.request("openPack", {
+      id: accountId,
+      packId,
+      productId,
+      packPowerType,
+    });
+  }
 }
 
 // 建立全域 Socket API 服務實例

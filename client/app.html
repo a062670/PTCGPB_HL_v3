@@ -245,7 +245,7 @@
             :loading="presentBoxStore.isReceivingPresentBox"
             @click="
               presentBoxStore.clearAll();
-              presentBoxStore.receivePresentBox(
+              presentBoxStore.clearReceivePresentBoxResult(
                 appStore.selectedAccount,
                 presentBoxStore.canBatchReceivePresentBoxList
               )
@@ -271,7 +271,7 @@
               color="primary"
               :loading="presentBoxStore.isReceivingPresentBox"
               @click="
-                presentBoxStore.clearAll();
+                presentBoxStore.clearReceivePresentBoxResult();
                 presentBoxStore.receivePresentBox(
                   appStore.selectedAccount,
                   [presentBox.presentId]

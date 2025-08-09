@@ -1,5 +1,6 @@
 import socketApiService from "../api.js";
 import toastService from "../toast.js";
+import { computePower } from "../units/computePower.js";
 
 const { ref, computed } = Vue;
 const { defineStore } = Pinia;
@@ -24,18 +25,9 @@ export const useFeedStore = defineStore("feed", () => {
     feedList.value = result.data.list;
     renewAfter.value = new Date(result.data.renewAfter * 1000).toLocaleString();
 
-    result.data.challengePower.amount = result.data.challengePower.amount || 0;
-    const amount =
-      result.data.challengePower.amount +
-      Math.floor(
-        (Date.now() -
-          result.data.challengePower.lastAutoHealedAt.seconds * 1000) /
-          (result.data.challengePower.healSecPerPower * 1000)
-      );
-    const nextAutoHealedAt =
-      result.data.challengePower.lastAutoHealedAt.seconds +
-      (amount - result.data.challengePower.amount + 1) *
-        result.data.challengePower.healSecPerPower;
+    const { amount, nextAutoHealedAt } = computePower(
+      result.data.challengePower
+    );
     const needCountOfLarge = Math.ceil(
       (nextAutoHealedAt * 1000 - Date.now()) / (1000 * 60 * 60)
     );

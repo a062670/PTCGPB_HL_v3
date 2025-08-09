@@ -10,8 +10,11 @@ const OpenPack = require("../steps/OpenPack.js");
 const FeedClient = require("../steps/FeedClient.js");
 const FriendClient = require("../steps/FriendClient.js");
 const PresentBoxClient = require("../steps/PresentBoxClient.js");
+const DeckClient = require("../steps/DeckClient.js");
+const SoloBattleClient = require("../steps/SoloBattleClient.js");
 
 const mainConfig = require("../config/main.json");
+const eventBattleConfig = require("../config/eventBattle.json");
 
 Grpc.setMaxRetries(1);
 
@@ -149,6 +152,50 @@ exports.doReceivePresentBox = async (accountId, presentBoxIds) => {
     throw new Error("account not found");
   }
   return await receivePresentBox(account, presentBoxIds);
+};
+
+/** 取得牌組列表 */
+exports.doGetDeckList = async (accountId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  return await getDeckList(account);
+};
+
+/** 取得事件能量 */
+exports.doGetEventPowers = async (accountId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  const eventPowers = await getEventPowers(account, [eventBattleConfig.id]);
+  if (!eventPowers[0]) {
+    return null;
+  }
+  return {
+    eventPower: eventPowers[0],
+    event: eventBattleConfig,
+  };
+};
+
+/** 開始事件戰鬥 */
+exports.doStartEventBattle = async (accountId, battleId, myDeckId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  return await startEventBattle(account, battleId, myDeckId);
+};
+
+/** 結束事件戰鬥 */
+exports.doFinishEventBattle = async (accountId, battleId, myDeckId, token) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  await finishEventBattle(account, battleId, myDeckId, token);
+  return;
 };
 
 // 發送 socket 通知的輔助函數
@@ -357,6 +404,50 @@ async function receivePresentBox(account, presentBoxIds) {
     });
   }
   return receivePresentBoxResponse.data;
+}
+
+async function getDeckList(account) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const deckList = await DeckClient.GetListV1(account.headers);
+  return deckList.data.decksList;
+}
+
+async function getEventPowers(account, eventIds) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const eventPowers = await SoloBattleClient.GetEventPowersV1(
+    account.headers,
+    eventIds
+  );
+  return eventPowers.data.eventPowersList;
+}
+
+async function startEventBattle(account, battleId, myDeckId) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const eventBattle = await SoloBattleClient.StartEventBattleV1(
+    account.headers,
+    battleId,
+    myDeckId
+  );
+  return eventBattle.data;
+}
+
+async function finishEventBattle(account, battleId, myDeckId, token) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  await SoloBattleClient.FinishEventBattleV1(
+    account.headers,
+    battleId,
+    myDeckId,
+    token
+  );
+  return;
 }
 
 async function sendToDiscord(message) {

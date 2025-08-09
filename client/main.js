@@ -2,6 +2,8 @@ import { useAppStore } from "./stores/app.js";
 import { useThemeStore } from "./stores/theme.js";
 import { usePresentBoxStore } from "./stores/presentBox.js";
 import { useFeedStore } from "./stores/feed.js";
+import { useEventBattleStore } from "./stores/eventBattle.js";
+
 import toastService from "./toast.js";
 
 const { ref, createApp, onMounted, computed } = Vue;
@@ -49,6 +51,7 @@ async function loadTemplate() {
       const themeStore = useThemeStore();
       const presentBoxStore = usePresentBoxStore();
       const feedStore = useFeedStore();
+      const eventBattleStore = useEventBattleStore();
 
       const theme = useTheme();
 
@@ -71,6 +74,7 @@ async function loadTemplate() {
         themeStore,
         presentBoxStore,
         feedStore,
+        eventBattleStore,
 
         toggleTheme,
       };

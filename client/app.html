@@ -83,6 +83,19 @@
         >
           取得禮物盒
         </v-btn>
+        <v-btn
+          v-if="account.isLogin"
+          color="info"
+          :loading="eventBattleStore.isGettingInfo"
+          @click="
+            appStore.showType = 'eventBattle'; 
+            eventBattleStore.clearAll(); 
+            appStore.selectAccount(account);
+            eventBattleStore.getInfo(account);
+          "
+        >
+          活動戰鬥
+        </v-btn>
       </div>
     </div>
   </v-navigation-drawer>
@@ -295,6 +308,43 @@
           >
             <div>presentId: {{ result.presentId }}</div>
             <div>isSuccesse: {{ result.isSuccesse }}</div>
+          </div>
+        </div>
+      </div>
+      <!-- 事件戰鬥 -->
+      <div v-if="appStore.showType === 'eventBattle'">
+        <div>活動戰鬥</div>
+        <div>
+          <div>排組</div>
+          <v-radio-group v-model="eventBattleStore.myDeckId" inline>
+            <v-radio
+              v-for="deck in eventBattleStore.deckList"
+              :key="deck.deckId"
+              :label="deck.deckName"
+              :value="deck.deckId"
+            ></v-radio>
+          </v-radio-group>
+        </div>
+        <div v-if="eventBattleStore.eventPower">
+          <div class="d-flex ga-2 align-center">
+            <div>
+              戰鬥力: {{ eventBattleStore.eventPower.eventPower.amount }}
+            </div>
+            <div>
+              自動回復: {{
+              eventBattleStore.eventPower.eventPower.nextAutoHealedAt }}
+            </div>
+          </div>
+          <div class="d-flex ga-2 align-center">
+            <v-btn
+              v-for="eventId in eventBattleStore.eventPower.event.ids"
+              :key="eventId"
+              color="primary"
+              :loading="eventBattleStore.isBattleRunning"
+              @click="eventBattleStore.runBattle(appStore.selectedAccount, eventId)"
+            >
+              {{ eventId }}
+            </v-btn>
           </div>
         </div>
       </div>

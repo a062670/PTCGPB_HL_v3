@@ -200,6 +200,35 @@ class SocketApiService {
   async receivePresentBox(accountId, presentBoxIds) {
     return this.request("receivePresentBox", { id: accountId, presentBoxIds });
   }
+
+  // 取得牌組列表
+  async getDeckList(accountId) {
+    return this.request("getDeckList", { id: accountId });
+  }
+
+  // 取得事件能量
+  async getEventPowers(accountId) {
+    return this.request("getEventPowers", { id: accountId });
+  }
+
+  // 開始事件戰鬥
+  async startEventBattle(accountId, battleId, myDeckId) {
+    return this.request("startEventBattle", {
+      id: accountId,
+      battleId,
+      myDeckId,
+    });
+  }
+
+  // 結束事件戰鬥
+  async finishEventBattle(accountId, battleId, myDeckId, token) {
+    return this.request("finishEventBattle", {
+      id: accountId,
+      battleId,
+      myDeckId,
+      token,
+    });
+  }
 }
 
 // 建立全域 Socket API 服務實例

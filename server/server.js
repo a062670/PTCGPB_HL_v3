@@ -235,6 +235,51 @@ io.on("connection", (socket) => {
     });
   });
 
+  // 取得牌組列表
+  socket.on("getDeckList", async (data) => {
+    console.log("收到 getDeckList 請求");
+    const deckList = await actions.doGetDeckList(data.id);
+    await handleSocketEvent(socket, "getDeckList", () => {
+      return deckList;
+    });
+  });
+
+  // 取得事件能量
+  socket.on("getEventPowers", async (data) => {
+    console.log("收到 getEventPowers 請求");
+    const eventPowers = await actions.doGetEventPowers(data.id);
+    await handleSocketEvent(socket, "getEventPowers", () => {
+      return eventPowers;
+    });
+  });
+
+  // 開始事件戰鬥
+  socket.on("startEventBattle", async (data) => {
+    console.log("收到 startEventBattle 請求");
+    const eventBattle = await actions.doStartEventBattle(
+      data.id,
+      data.battleId,
+      data.myDeckId
+    );
+    await handleSocketEvent(socket, "startEventBattle", () => {
+      return eventBattle;
+    });
+  });
+
+  // 結束事件戰鬥
+  socket.on("finishEventBattle", async (data) => {
+    console.log("收到 finishEventBattle 請求");
+    await actions.doFinishEventBattle(
+      data.id,
+      data.battleId,
+      data.myDeckId,
+      data.token
+    );
+    await handleSocketEvent(socket, "finishEventBattle", () => {
+      return {};
+    });
+  });
+
   // 斷線處理
   socket.on("disconnect", () => {
     console.log("客戶端已斷線:", socket.id);

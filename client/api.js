@@ -168,6 +168,29 @@ class SocketApiService {
     return this.request("getFeedList", { id: accountId });
   }
 
+  // 補充得卡力
+  async healChallengePower(accountId, type, amount) {
+    return this.request("healChallengePower", { id: accountId, type, amount });
+  }
+
+  // 開始得卡
+  async feedSnoop(accountId, feedId, usedForRevivalChallengePower) {
+    return this.request("feedSnoop", {
+      id: accountId,
+      feedId,
+      usedForRevivalChallengePower,
+    });
+  }
+
+  // 得卡選卡
+  async feedChallenge(accountId, feedId, challengeType) {
+    return this.request("feedChallenge", {
+      id: accountId,
+      feedId,
+      challengeType,
+    });
+  }
+
   // 取得禮物盒
   async getPresentBoxList(accountId) {
     return this.request("getPresentBoxList", { id: accountId });

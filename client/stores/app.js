@@ -16,8 +16,7 @@ export const useAppStore = defineStore("app", () => {
   const selectedAccountId = ref(null);
 
   // 資料相關
-  const showType = ref("feedList");
-  const feedList = ref({});
+  const showType = ref("");
 
   // 計算屬性
   const selectedAccount = computed(() => {
@@ -118,20 +117,6 @@ export const useAppStore = defineStore("app", () => {
     account.isDeletingFriends = false;
   };
 
-  const getFeedList = async (account) => {
-    account.isGettingFeedList = true;
-    const result = await socketApiService.getFeedList(account.id);
-    feedList.value = {
-      ...result.data,
-      renewAfter: new Date(result.data.renewAfter * 1000).toLocaleString(),
-    };
-    account.isGettingFeedList = false;
-  };
-
-  const clearFeedList = () => {
-    feedList.value = {};
-  };
-
   const selectAccount = (account) => {
     selectedAccountId.value = account.id;
   };
@@ -156,7 +141,6 @@ export const useAppStore = defineStore("app", () => {
     accounts,
     selectedAccountId,
     showType,
-    feedList,
 
     // 計算屬性
     selectedAccount,
@@ -170,8 +154,6 @@ export const useAppStore = defineStore("app", () => {
     approve,
     stopApprove,
     deleteAllFriends,
-    getFeedList,
-    clearFeedList,
     selectAccount,
     clearSelectedAccount,
   };

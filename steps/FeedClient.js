@@ -1,4 +1,5 @@
 const Grpc = require("../lib/Grpc.js");
+const { createUuidV4 } = require("../lib/Units.js");
 
 const FeedRenewTimelineV1Proto = require("../generated/takasho/schema/lettuce_server/player_api/feed_renew_timeline_v1_pb.js");
 const FeedSnoopV1Proto = require("../generated/takasho/schema/lettuce_server/player_api/feed_snoop_v1_pb.js");
@@ -7,6 +8,11 @@ const FeedTypeProto = require("../generated/takasho/schema/lettuce_server/resour
 const FeedRevivalItemsProto = require("../generated/takasho/schema/lettuce_server/resource/feed/feed_revival_items_pb.js");
 const RevivalClockProto = require("../generated/takasho/schema/lettuce_server/resource/item/revival_clock_pb.js");
 const FeedShareV1Proto = require("../generated/takasho/schema/lettuce_server/player_api/feed_share_v1_pb.js");
+const FeedHealChallengePowerV1Proto = require("../generated/takasho/schema/lettuce_server/player_api/feed_heal_challenge_power_v1_pb.js");
+
+const ChallengePowerHealItemsProto = require("../generated/takasho/schema/lettuce_server/resource/feed/challenge_power_heal_items_pb.js");
+const ChallengePowerChargerProto = require("../generated/takasho/schema/lettuce_server/resource/item/challenge_power_charger_pb.js");
+
 const { getCachedBytes } = require("../lib/Units.js");
 const RenewTimelineV1 = async (headers) => {
   const bytes = getCachedBytes(["Feed/RenewTimelineV1"], () => {
@@ -34,11 +40,11 @@ const RenewTimelineV1 = async (headers) => {
   };
 };
 
-const SnoopV1 = async (headers, feedId) => {
+const SnoopV1 = async (headers, feedId, usedForRevivalChallengePower = 1) => {
   const request = new FeedSnoopV1Proto.FeedSnoopV1.Types.Request();
   request.setFeedType(FeedTypeProto.FeedType.FEED_TYPE_SOMEONE);
   request.setFeedId(feedId);
-  request.setUsedForRevivalChallengePower(1);
+  request.setUsedForRevivalChallengePower(usedForRevivalChallengePower);
 
   const revivalItems = new FeedRevivalItemsProto.FeedRevivalItems();
   revivalItems.setVcAmount(0);
@@ -47,8 +53,19 @@ const SnoopV1 = async (headers, feedId) => {
   request.setRevivalItems(revivalItems);
 
   const bytes = request.serializeBinary();
-  await Grpc.sendGrpcRequest("Feed/SnoopV1", headers, bytes, false);
-  return;
+
+  const result = await Grpc.sendGrpcRequest("Feed/SnoopV1", headers, bytes);
+
+  const resultBody =
+    FeedSnoopV1Proto.FeedSnoopV1.Types.Response.deserializeBinary(
+      await result.body
+    );
+  const body = resultBody.toObject();
+
+  return {
+    data: body,
+    headers: result.headers,
+  };
 };
 
 /** challengeType: 1:偷偷看 3:一般 */
@@ -56,17 +73,45 @@ const ChallengeV2 = async (headers, feedId, challengeType) => {
   const request = new FeedChallengeV2Proto.FeedChallengeV2.Types.Request();
   request.setFeedType(FeedTypeProto.FeedType.FEED_TYPE_SOMEONE);
   request.setFeedId(feedId);
-  request.setChallengeType(
-    challengeType === 3
-      ? FeedChallengeV2Proto.FeedChallengeV2.Types.Request.Types
-          .FeedChallengeType.FEED_CHALLENGE_TYPE_IGNORE_PREVIOUS_RESULTS
-      : FeedChallengeV2Proto.FeedChallengeV2.Types.Request.Types
-          .FeedChallengeType.FEED_CHALLENGE_TYPE_SELECT_ONE_SNOOPED
-  );
+  let challengeTypeEnum;
+  switch (challengeType) {
+    case 1:
+      challengeTypeEnum =
+        FeedChallengeV2Proto.FeedChallengeV2.Types.Request.Types
+          .FeedChallengeType.FEED_CHALLENGE_TYPE_SELECT_ONE_SNOOPED;
+      break;
+    case 2:
+      challengeTypeEnum =
+        FeedChallengeV2Proto.FeedChallengeV2.Types.Request.Types
+          .FeedChallengeType.FEED_CHALLENGE_TYPE_SELECT_OTHER_ONES;
+      break;
+    case 3:
+      challengeTypeEnum =
+        FeedChallengeV2Proto.FeedChallengeV2.Types.Request.Types
+          .FeedChallengeType.FEED_CHALLENGE_TYPE_IGNORE_PREVIOUS_RESULTS;
+      break;
+    default:
+      challengeTypeEnum =
+        FeedChallengeV2Proto.FeedChallengeV2.Types.Request.Types
+          .FeedChallengeType.FEED_CHALLENGE_TYPE_IGNORE_PREVIOUS_RESULTS;
+      break;
+  }
+  request.setChallengeType(challengeTypeEnum);
 
   const bytes = request.serializeBinary();
-  await Grpc.sendGrpcRequest("Feed/ChallengeV2", headers, bytes, false);
-  return;
+
+  const result = await Grpc.sendGrpcRequest("Feed/ChallengeV2", headers, bytes);
+
+  const resultBody =
+    FeedChallengeV2Proto.FeedChallengeV2.Types.Response.deserializeBinary(
+      await result.body
+    );
+  const body = resultBody.toObject();
+
+  return {
+    data: body,
+    headers: result.headers,
+  };
 };
 
 const ShareV1 = async (headers, transactionId) => {
@@ -75,6 +120,37 @@ const ShareV1 = async (headers, transactionId) => {
 
   const bytes = request.serializeBinary();
   await Grpc.sendGrpcRequest("Feed/ShareV1", headers, bytes, false);
+  return;
+};
+
+const HealChallengePowerV1 = async (headers, type, amount) => {
+  const request =
+    new FeedHealChallengePowerV1Proto.FeedHealChallengePowerV1.Types.Request();
+  request.setTransactionId(createUuidV4());
+
+  const challengePowerHealItems =
+    new ChallengePowerHealItemsProto.ChallengePowerHealItems();
+  challengePowerHealItems.setVcAmount(0);
+
+  const challengePowerCharger =
+    new ChallengePowerChargerProto.ChallengePowerCharger();
+  challengePowerCharger.setAmount(amount);
+  // 目前固定使用沙漏
+  challengePowerCharger.setType(
+    ChallengePowerChargerProto.ChallengePowerCharger.Types.Type.TYPE_LARGE
+  );
+
+  challengePowerHealItems.setChargersList([challengePowerCharger]);
+
+  request.setItems(challengePowerHealItems);
+
+  const bytes = request.serializeBinary();
+  await Grpc.sendGrpcRequest(
+    "Feed/HealChallengePowerV1",
+    headers,
+    bytes,
+    false
+  );
   return;
 };
 
@@ -113,6 +189,7 @@ module.exports = {
   SnoopV1,
   ChallengeV2,
   ShareV1,
+  HealChallengePowerV1,
 
   filterFeeds,
 };

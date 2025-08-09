@@ -104,6 +104,37 @@ exports.doGetFeedList = async (accountId) => {
   return await getFeedList(account);
 };
 
+/** 補充得卡力 */
+exports.doHealChallengePower = async (accountId, type, amount) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  return await healChallengePower(account, type, amount);
+};
+
+/** 開始得卡 */
+exports.doFeedSnoop = async (
+  accountId,
+  feedId,
+  usedForRevivalChallengePower
+) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  return await feedSnoop(account, feedId, usedForRevivalChallengePower);
+};
+
+/** 得卡選卡 */
+exports.doFeedChallenge = async (accountId, feedId, challengeType) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  return await feedChallenge(account, feedId, challengeType);
+};
+
 exports.doGetPresentBoxList = async (accountId) => {
   const account = accounts.find((acc) => acc.id === accountId);
   if (!account) {
@@ -227,14 +258,55 @@ async function getFeedList(account) {
     .map((feed) => ({
       someoneFeedId: feed.someoneFeedId,
       nickname: feed.player.nickname,
-      cardIds: feed.contents.cardsList.map((card) => card.cardId).join(","),
+      cardsList: feed.contents.cardsList,
       isFriend: feed.player.isFriend,
+      challengeInfo: feed.challengeInfo,
+      disable: feed.contents.cardsList.some((card) => card.disable),
     }));
   const renewAfter = renewTimelineV1Response.data.timeline.renewAfter.seconds;
   return {
     list,
     renewAfter,
+    challengePower: renewTimelineV1Response.data.challengePower,
   };
+}
+
+/** 補充得卡力 */
+async function healChallengePower(account, type, amount) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  await FeedClient.HealChallengePowerV1(account.headers, type, amount);
+}
+
+/** 開始得卡 */
+async function feedSnoop(account, feedId, usedForRevivalChallengePower) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const snoopResponse = await FeedClient.SnoopV1(
+    account.headers,
+    feedId,
+    usedForRevivalChallengePower
+  );
+  console.log(snoopResponse.data.timeline.someoneFeedsList);
+  return snoopResponse.data.timeline.someoneFeedsList.find((feed) => {
+    console.log(feed.someoneFeedId, feedId);
+    return feed.someoneFeedId === feedId;
+  });
+}
+
+/** 得卡選卡 */
+async function feedChallenge(account, feedId, challengeType) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const challengeResponse = await FeedClient.ChallengeV2(
+    account.headers,
+    feedId,
+    challengeType
+  );
+  return challengeResponse.data.pickedCardsList;
 }
 
 async function getPresentBoxList(account) {

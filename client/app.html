@@ -63,9 +63,9 @@
           :loading="account.isGettingFeedList"
           @click="
             appStore.showType = 'feedList';
-            appStore.clearFeedList();
+            feedStore.clearAll();
             appStore.selectAccount(account);
-            appStore.getFeedList(account);
+            feedStore.getFeedList(account);
           "
         >
           取得得卡列表
@@ -76,8 +76,7 @@
           :loading="account.isGettingPresentBoxList"
           @click="
             appStore.showType = 'presentBoxList';
-            presentBoxStore.clearPresentBoxList();
-            presentBoxStore.clearReceivePresentBoxResult();
+            presentBoxStore.clearAll();
             appStore.selectAccount(account);
             presentBoxStore.getPresentBoxList(account);
           "
@@ -98,21 +97,130 @@
           appStore.selectedAccount.id }}
         </div>
       </div>
-      <!-- 得卡 -->
+      <!-- 得卡列表 -->
       <div
         class="d-flex flex-column ga-2"
         v-if="appStore.showType === 'feedList'"
       >
-        <div>下次更新時間: {{ appStore.feedList.renewAfter }}</div>
+        <div>下次更新時間: {{ feedStore.renewAfter }}</div>
+        <div class="d-flex ga-2 align-center" v-if="feedStore.challengePower">
+          <div>得卡力: {{ feedStore.challengePower.amount }}</div>
+          <div>自動回復: {{ feedStore.challengePower.nextAutoHealedAt }}</div>
+          <div
+            v-if="feedStore.challengePower.amount < feedStore.challengePower.autoHealLimit"
+          >
+            <v-btn
+              color="primary"
+              :loading="feedStore.isHealingChallengePower"
+              @click="feedStore.healChallengePower(appStore.selectedAccount)"
+            >
+              補一個(沙漏: {{feedStore.challengePower.needCountOfLarge}})
+            </v-btn>
+          </div>
+        </div>
         <div
-          v-for="feed in appStore.feedList.list"
+          v-for="feed in feedStore.feedList"
           :key="feed.someoneFeedId"
           class="pa-2"
           :class="{ 'border-lg border-primary border-opacity-100 rounded-xl': feed.isFriend }"
         >
-          <div>{{ feed.nickname }}</div>
-          <div>{{ feed.cardIds }}</div>
-          <div>{{ feed.isFriend }}</div>
+          <div class="d-flex ga-2 align-center">
+            <div>({{ feed.challengeInfo.requireFeedStamina }}力)</div>
+            <div>{{ feed.nickname }}</div>
+          </div>
+          <div v-if="feed.disable">已抽</div>
+          <div v-else-if="feed.challengeInfo.endAt.seconds * 1000 < Date.now()">
+            已過期
+          </div>
+          <div class="d-flex ga-2 align-center" v-else>
+            <div>
+              到期： {{ new Date(feed.challengeInfo.endAt.seconds *
+              1000).toLocaleString() }}
+            </div>
+            <div
+              v-if="feedStore.challengePower.amount >= feed.challengeInfo.requireFeedStamina"
+            >
+              <v-btn
+                color="info"
+                :loading="feedStore.isFeedSnooping"
+                @click="
+                  appStore.showType = 'feedSnoop';
+                  feedStore.clearFeedSnoopResult();
+                  feedStore.feedSnoop(
+                    appStore.selectedAccount,
+                    feed.someoneFeedId,
+                    feed.challengeInfo.usedForRevivalChallengePower
+                  )
+                "
+              >
+                抽他
+              </v-btn>
+            </div>
+          </div>
+          <div class="d-flex ga-2 mt-2 align-center">
+            <div
+              v-for="(card, index) in feed.cardsList"
+              :key="`${card.cardId}-${index}`"
+            >
+              <img
+                :src="`https://car-fs.gagu.dev/PackViewer/images/${card.cardId}.png`"
+                width="100"
+                :class="{ 
+                  'border-lg border-primary border-opacity-100 rounded-xl': card.disable,
+                  'border-lg border-warning border-opacity-100 rounded-xl': card.isSnooped
+                }"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 得卡 -->
+      <div v-if="appStore.showType === 'feedSnoop'">
+        <div>得卡</div>
+        <div v-if="feedStore.feedSnoopResult">
+          <div class="d-flex ga-2 mt-2 align-center">
+            <img
+              v-for="(card, index) in feedStore.feedSnoopResult.contents.cardsList"
+              :key="`${card.cardId}-${index}`"
+              :src="`https://car-fs.gagu.dev/PackViewer/images/${card.cardId}.png`"
+              width="100"
+              :class="{ 
+                'border-lg border-primary border-opacity-100 rounded-xl': card.disable,
+                'border-lg border-warning border-opacity-100 rounded-xl': card.isSnooped
+              }"
+            />
+          </div>
+          <div
+            v-if="!feedStore.feedChallengeResult && feedStore.feedSnoopResult.contents.cardsList.some(card => card.isSnooped)"
+            class="d-flex ga-2 mt-2 align-center"
+          >
+            <v-btn
+              color="warning"
+              :loading="feedStore.isFeedChallenging"
+              @click="feedStore.feedChallenge(appStore.selectedAccount, feedStore.feedSnoopResult.someoneFeedId, 1)"
+            >
+              就這張
+            </v-btn>
+            <v-btn
+              color="primary"
+              :loading="feedStore.isFeedChallenging"
+              @click="feedStore.feedChallenge(appStore.selectedAccount, feedStore.feedSnoopResult.someoneFeedId, 2)"
+            >
+              另一張
+            </v-btn>
+          </div>
+          <div
+            v-if="feedStore.feedChallengeResult"
+            class="d-flex ga-2 mt-2 align-center"
+          >
+            <div>得卡結果</div>
+            <img
+              v-for="(card, index) in feedStore.feedChallengeResult"
+              :key="`${card.cardId}-${index}`"
+              :src="`https://car-fs.gagu.dev/PackViewer/images/${card.cardId}.png`"
+              width="100"
+            />
+          </div>
         </div>
       </div>
       <!-- 禮物盒 -->
@@ -123,7 +231,7 @@
             color="primary"
             :loading="presentBoxStore.isReceivingPresentBox"
             @click="
-              presentBoxStore.clearReceivePresentBoxResult();
+              presentBoxStore.clearAll();
               presentBoxStore.receivePresentBox(
                 appStore.selectedAccount,
                 presentBoxStore.canBatchReceivePresentBoxList
@@ -150,7 +258,7 @@
               color="primary"
               :loading="presentBoxStore.isReceivingPresentBox"
               @click="
-                presentBoxStore.clearReceivePresentBoxResult();
+                presentBoxStore.clearAll();
                 presentBoxStore.receivePresentBox(
                   appStore.selectedAccount,
                   [presentBox.presentId]

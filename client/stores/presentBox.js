@@ -51,6 +51,12 @@ export const usePresentBoxStore = defineStore("presentBox", () => {
     getPresentBoxList(account);
   };
 
+  // 清除所有
+  const clearAll = () => {
+    clearPresentBoxList();
+    clearReceivePresentBoxResult();
+  };
+
   // 清除禮物列表
   const clearPresentBoxList = () => {
     presentBoxList.value = [];
@@ -73,6 +79,7 @@ export const usePresentBoxStore = defineStore("presentBox", () => {
     // Actions
     getPresentBoxList,
     receivePresentBox,
+    clearAll,
     clearPresentBoxList,
     clearReceivePresentBoxResult,
   };

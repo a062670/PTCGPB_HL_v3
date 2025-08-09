@@ -179,6 +179,41 @@ io.on("connection", (socket) => {
     });
   });
 
+  // 補充得卡力
+  socket.on("healChallengePower", async (data) => {
+    console.log("收到 healChallengePower 請求");
+    await actions.doHealChallengePower(data.id, data.type, data.amount);
+    await handleSocketEvent(socket, "healChallengePower", () => {
+      return {};
+    });
+  });
+
+  // 開始得卡
+  socket.on("feedSnoop", async (data) => {
+    console.log("收到 feedSnoop 請求");
+    const feed = await actions.doFeedSnoop(
+      data.id,
+      data.feedId,
+      data.usedForRevivalChallengePower
+    );
+    await handleSocketEvent(socket, "feedSnoop", () => {
+      return feed;
+    });
+  });
+
+  // 得卡選卡
+  socket.on("feedChallenge", async (data) => {
+    console.log("收到 feedChallenge 請求");
+    const pickedCards = await actions.doFeedChallenge(
+      data.id,
+      data.feedId,
+      data.challengeType
+    );
+    await handleSocketEvent(socket, "feedChallenge", () => {
+      return pickedCards;
+    });
+  });
+
   // 取得禮物列表
   socket.on("getPresentBoxList", async (data) => {
     console.log("收到 getPresentBoxList 請求");

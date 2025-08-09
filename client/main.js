@@ -4,6 +4,7 @@ import { usePresentBoxStore } from "./stores/presentBox.js";
 import { useFeedStore } from "./stores/feed.js";
 import { useEventBattleStore } from "./stores/eventBattle.js";
 import { usePackStore } from "./stores/pack.js";
+import { useItemShopStore } from "./stores/itemShop.js";
 
 import toastService from "./toast.js";
 
@@ -54,6 +55,7 @@ async function loadTemplate() {
       const feedStore = useFeedStore();
       const eventBattleStore = useEventBattleStore();
       const packStore = usePackStore();
+      const itemShopStore = useItemShopStore();
 
       const theme = useTheme();
 
@@ -78,6 +80,7 @@ async function loadTemplate() {
         feedStore,
         eventBattleStore,
         packStore,
+        itemShopStore,
 
         toggleTheme,
       };

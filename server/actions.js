@@ -13,6 +13,7 @@ const PresentBoxClient = require("../steps/PresentBoxClient.js");
 const DeckClient = require("../steps/DeckClient.js");
 const SoloBattleClient = require("../steps/SoloBattleClient.js");
 const PackClient = require("../steps/PackClient.js");
+const ItemShopClient = require("../steps/ItemShopClient.js");
 
 const mainConfig = require("../config/main.json");
 const eventBattleConfig = require("../config/eventBattle.json");
@@ -220,6 +221,30 @@ exports.doOpenPack = async (accountId, packId, productId, packPowerType) => {
     throw new Error("account not found");
   }
   return await openPack(account, packId, productId, packPowerType);
+};
+
+/** 取得商店購買摘要 */
+exports.doGetItemShopPurchaseSummaries = async (accountId, productId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  return await getItemShopPurchaseSummaries(account, productId);
+};
+
+/** 購貸商店商品 */
+exports.doPurchaseItemShop = async (
+  accountId,
+  productId,
+  ticketAmount,
+  times
+) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  await purchaseItemShop(account, productId, ticketAmount, times);
+  return;
 };
 
 // 發送 socket 通知的輔助函數
@@ -495,6 +520,32 @@ async function openPack(account, packId, productId, packPowerType) {
     packPowerType
   );
   return openPackResponse;
+}
+
+/** 取得商店購買摘要 */
+async function getItemShopPurchaseSummaries(account, productId) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const itemShopPurchaseSummaries = await ItemShopClient.GetPurchaseSummariesV1(
+    account.headers,
+    productId
+  );
+  return itemShopPurchaseSummaries.data;
+}
+
+/** 購買商店商品 */
+async function purchaseItemShop(account, productId, ticketAmount, times) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const purchaseItemShopResponse = await ItemShopClient.PurchaseV1(
+    account.headers,
+    productId,
+    ticketAmount,
+    times
+  );
+  return;
 }
 
 async function sendToDiscord(message) {

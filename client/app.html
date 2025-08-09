@@ -109,6 +109,14 @@
         >
           開包
         </v-btn>
+        <v-btn
+          v-if="account.isLogin"
+          color="info"
+          :loading="itemShopStore.isRunning"
+          @click="itemShopStore.runPurchase(account)"
+        >
+          每日禮物
+        </v-btn>
       </div>
     </div>
   </v-navigation-drawer>

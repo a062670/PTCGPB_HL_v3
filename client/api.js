@@ -244,6 +244,24 @@ class SocketApiService {
       packPowerType,
     });
   }
+
+  // 取得商店購買摘要
+  async getItemShopPurchaseSummaries(accountId, productId) {
+    return this.request("getItemShopPurchaseSummaries", {
+      id: accountId,
+      productId,
+    });
+  }
+
+  // 購買商店商品
+  async purchaseItemShop(accountId, productId, ticketAmount, times) {
+    return this.request("purchaseItemShop", {
+      id: accountId,
+      productId,
+      ticketAmount,
+      times,
+    });
+  }
 }
 
 // 建立全域 Socket API 服務實例

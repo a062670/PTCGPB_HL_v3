@@ -303,6 +303,30 @@ io.on("connection", (socket) => {
     });
   });
 
+  // 取得商店購買摘要
+  socket.on("getItemShopPurchaseSummaries", async (data) => {
+    console.log("收到 getItemShopPurchaseSummaries 請求");
+    const itemShopPurchaseSummaries =
+      await actions.doGetItemShopPurchaseSummaries(data.id, data.productId);
+    await handleSocketEvent(socket, "getItemShopPurchaseSummaries", () => {
+      return itemShopPurchaseSummaries;
+    });
+  });
+
+  // 購買商店商品
+  socket.on("purchaseItemShop", async (data) => {
+    console.log("收到 purchaseItemShop 請求");
+    await actions.doPurchaseItemShop(
+      data.id,
+      data.productId,
+      data.ticketAmount,
+      data.times
+    );
+    await handleSocketEvent(socket, "purchaseItemShop", () => {
+      return {};
+    });
+  });
+
   // 斷線處理
   socket.on("disconnect", () => {
     console.log("客戶端已斷線:", socket.id);

@@ -35,12 +35,12 @@ export const usePresentBoxStore = defineStore("presentBox", () => {
 
   // 領取禮物
   const receivePresentBox = async (account, presentBoxIds = null) => {
-    isReceivingPresentBox.value = true;
     const presentBoxIdsToReceive =
       presentBoxIds || canBatchReceivePresentBoxList.value;
     if (presentBoxIdsToReceive.length <= 0) {
       return;
     }
+    isReceivingPresentBox.value = true;
     const result = await socketApiService.receivePresentBox(
       account.id,
       presentBoxIdsToReceive

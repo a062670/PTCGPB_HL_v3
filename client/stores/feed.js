@@ -24,7 +24,11 @@ export const useFeedStore = defineStore("feed", () => {
     const result = await socketApiService.getFeedList(account.id);
     feedList.value = result.data.list;
     renewAfter.value = new Date(result.data.renewAfter * 1000).toLocaleString();
-
+    feedList.value.sort((a, b) => {
+      if (a.isFriend && !b.isFriend) return -1;
+      if (!a.isFriend && b.isFriend) return 1;
+      return 0;
+    });
     const { amount, nextAutoHealedAt } = computePower(
       result.data.challengePower
     );

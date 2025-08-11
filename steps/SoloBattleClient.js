@@ -181,11 +181,29 @@ const FinishEventBattleV1 = async (headers, battleId, myDeckId, token) => {
   deck.setMyDeckId(myDeckId);
   request.setDeck(deck);
 
-  const battleTryProgress =
-    new SoloBattleTryProgressProto.SoloBattleTryProgress();
-  battleTryProgress.setBattleTryId(`BT_TR_${battleId}_02`);
-  battleTryProgress.setCurrentCount(1);
-  request.setBattleTryProgressesList([battleTryProgress]);
+  const battleTryProgressesList = [];
+
+  if (battleId.startsWith("BT_GR")) {
+    const currentCountSettingList = [
+      [],
+      [1, 3],
+      [2, 1, 1],
+      [2, 1, 1, 1],
+      [1, 1, 1, 10, 20],
+    ];
+    const idx = Number(battleId.split("_").pop());
+    const currentCountSetting = currentCountSettingList[idx];
+    if (currentCountSetting) {
+      for (let i = 1; i <= currentCountSetting.length; i++) {
+        const battleTryProgress =
+          new SoloBattleTryProgressProto.SoloBattleTryProgress();
+        battleTryProgress.setBattleTryId(`BT_TR_${battleId}_0${i}`);
+        battleTryProgress.setCurrentCount(currentCountSetting[i - 1]);
+        battleTryProgressesList.push(battleTryProgress);
+      }
+    }
+  }
+  request.setBattleTryProgressesList(battleTryProgressesList);
 
   const battleStats =
     new SoloBattleInGameStatisticsProto.SoloBattleInGameStatistics();

@@ -1,6 +1,6 @@
 # 寶可夢集換式卡牌遊戲機器人 (PTCGPB_HL_v3)
 
-一個基於 Node.js 的寶可夢集換式卡牌遊戲手機應用程式自動化機器人。此機器人提供帳號管理、好友請求、開包和各種遊戲互動的自動化功能。
+一個基於 Node.js 的寶可夢集換式卡牌遊戲手機應用程式自動化機器人。此機器人提供帳號管理、好友請求、開包和各種遊戲互動的自動化功能，以及用於手動操作的現代化網頁介面。
 
 ## 🎯 功能特色
 
@@ -10,6 +10,7 @@
 - **開包操作**: 自動開包，智能治療系統
 - **社交功能**: 分享開包結果，查看好友動態
 - **多帳號支援**: 同時管理多個遊戲帳號
+- **網頁介面**: 基於 Vue.js 的現代化網頁應用程式，用於手動操作
 
 ### 自動化功能
 - **自動批准好友**: 自動接受 incoming 好友請求
@@ -17,14 +18,27 @@
 - **Discord 整合**: 機器人活動的 Webhook 通知
 - **錯誤恢復**: 自動重試機制，指數退避
 
+### 網頁介面功能
+- **即時操作**: 基於 Socket.IO 的即時通訊
+- **帳號管理**: 在多個遊戲帳號間切換
+- **開包操作**: 手動開包和管理
+- **好友管理**: 發送、批准、拒絕好友請求
+- **社交動態**: 查看和互動好友活動
+- **牌組管理**: 查看和管理卡牌牌組
+- **事件戰鬥**: 參與特殊遊戲事件
+
 ## 🏗️ 專案結構
 
 ```
 PTCGPB_HL_v3/
 ├── config/                 # 配置檔案
-│   ├── main.json.example   # 主要機器人配置模板
+│   ├── main.json          # 主要機器人配置
+│   ├── main.json.example  # 主要機器人配置模板
+│   ├── server.json        # 伺服器配置
 │   ├── server.json.example # 伺服器配置模板
-│   └── static.json         # 靜態應用程式配置
+│   ├── static.json        # 靜態應用程式配置
+│   ├── pack.json          # 卡包配置
+│   └── eventBattle.json   # 事件戰鬥配置
 ├── lib/                    # 核心函式庫
 │   ├── Grpc.js            # gRPC 通訊層
 │   ├── client.js          # gRPC 客戶端管理
@@ -42,9 +56,20 @@ PTCGPB_HL_v3/
 │   ├── OpenPack.js        # 開包邏輯
 │   └── GetJwt.js          # JWT 令牌獲取
 ├── server/                 # 伺服器組件
+│   ├── server.js          # Express + Socket.IO 伺服器
+│   └── actions.js         # 伺服器端操作
+├── client/                 # 網頁介面
+│   ├── index.html         # 主要應用程式入口
+│   ├── app.html           # 應用程式介面
+│   ├── login.html         # 登入頁面
+│   ├── main.js            # Vue.js 應用程式
+│   ├── api.js             # API 客戶端
+│   ├── toast.js           # Toast 通知
+│   └── stores/            # Pinia 狀態管理
 ├── tester/                 # 互動式測試工具
 ├── generated/              # 生成的檔案
 ├── approve.js             # 主要自動化腳本
+├── start.bat              # Windows 啟動腳本
 └── package.json           # 依賴項和專案資訊
 ```
 
@@ -69,7 +94,7 @@ PTCGPB_HL_v3/
 
 3. **配置機器人**
    ```bash
-   # 複製配置模板
+   # 複製配置模板（如果尚未存在）
    cp config/main.json.example config/main.json
    cp config/server.json.example config/server.json
    ```
@@ -90,9 +115,16 @@ PTCGPB_HL_v3/
       "password": "您的遊戲密碼"
     }
   ],
+  "reLoginWaitTime": 10,
   "testAccount": {
     "id": "測試帳號ID",
     "password": "測試帳號密碼"
+  },
+  "auth": {
+    "enable": false,
+    "username": "網頁使用者名稱",
+    "password": "網頁密碼",
+    "secret": "會話密鑰"
   },
   "webhook": "您的discord_webhook_url"
 }
@@ -102,11 +134,32 @@ PTCGPB_HL_v3/
 
 ```json
 {
-  "server": "http://your-jwt-server.com"
+  "server": "https://your-jwt-server.com"
 }
 ```
 
 ## 🎮 使用方法
+
+### 網頁介面（推薦）
+
+啟動網頁伺服器並存取現代化介面：
+
+```bash
+npm run start-server
+```
+
+網頁介面將自動在 `http://localhost:9487/` 開啟
+
+**網頁介面可用功能：**
+- 帳號切換和管理
+- 登入/註冊
+- 個人資料管理
+- 開包和管理
+- 好友請求管理
+- 社交動態查看
+- 牌組管理
+- 事件戰鬥參與
+- 商品商店操作
 
 ### 互動式測試工具
 
@@ -140,10 +193,17 @@ node approve.js
 
 ## 🔧 關鍵組件
 
+### 網頁伺服器
+- **Express.js**: HTTP 伺服器框架
+- **Socket.IO**: 即時雙向通訊
+- **會話管理**: 網頁介面的可選身份驗證
+- **靜態檔案服務**: Vue.js 應用程式託管
+
 ### 身份驗證系統
 - 基於 JWT 的身份驗證，使用外部伺服器
 - 會話令牌管理
 - 自動登入續期
+- 可選的網頁介面身份驗證
 
 ### gRPC 通訊
 - 與遊戲伺服器的加密通訊
@@ -166,6 +226,7 @@ node approve.js
 - 會話令牌管理
 - 安全的憑證儲存
 - 速率限制和重試機制
+- 可選的網頁介面身份驗證
 
 ## 📊 監控
 
@@ -204,9 +265,20 @@ node approve.js
 
 - `@grpc/grpc-js`: gRPC 通訊
 - `axios`: HTTP 客戶端
+- `express`: 網頁伺服器框架
+- `express-session`: 會話管理
+- `socket.io`: 即時通訊
 - `google-protobuf`: Protocol buffer 支援
 - `inquirer`: 互動式 CLI
 - `uuid`: 唯一識別碼生成
+- `open`: 自動開啟瀏覽器
+
+## 🚀 快速開始
+
+1. **安裝依賴項**: `npm install`
+2. **配置帳號**: 編輯 `config/main.json`
+3. **啟動網頁介面**: `npm run start-server`
+4. **存取位置**: `http://localhost:9487/`
 
 ## ⚠️ 免責聲明
 

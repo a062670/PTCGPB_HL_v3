@@ -14,7 +14,9 @@
     <div v-for="account in appStore.accounts" :key="account.id" class="pa-2">
       <div>{{ account.nickname }}</div>
       <div>{{ account.id }}</div>
-      <div>{{ account.friendList }}</div>
+      <div :class="{ 'text-red': account.friendList[0] >= 90 }">
+        好友: {{ account.friendList.join(" - ") }}
+      </div>
       <div>{{ account.lastUpdateAt }}</div>
       <div class="d-flex ga-2 flex-wrap">
         <v-btn
@@ -191,7 +193,7 @@
               </v-btn>
             </div>
           </div>
-          <div class="d-flex ga-2 mt-2 align-center">
+          <div class="d-flex ga-2 mt-2 align-center flex-wrap">
             <div
               v-for="(card, index) in feed.cardsList"
               :key="`${card.cardId}-${index}`"
@@ -212,7 +214,7 @@
       <div v-if="appStore.showType === 'feedSnoop'">
         <div>得卡</div>
         <div v-if="feedStore.feedSnoopResult">
-          <div class="d-flex ga-2 mt-2 align-center">
+          <div class="d-flex ga-2 mt-2 align-center flex-wrap">
             <img
               v-for="(card, index) in feedStore.feedSnoopResult.contents.cardsList"
               :key="`${card.cardId}-${index}`"
@@ -226,7 +228,7 @@
           </div>
           <div
             v-if="!feedStore.feedChallengeResult && feedStore.feedSnoopResult.contents.cardsList.some(card => card.isSnooped)"
-            class="d-flex ga-2 mt-2 align-center"
+            class="d-flex ga-2 mt-2 align-center flex-wrap"
           >
             <v-btn
               color="warning"
@@ -245,7 +247,7 @@
           </div>
           <div
             v-if="feedStore.feedChallengeResult"
-            class="d-flex ga-2 mt-2 align-center"
+            class="d-flex ga-2 mt-2 align-center flex-wrap"
           >
             <div>得卡結果</div>
             <img
@@ -401,7 +403,7 @@
         </div>
         <div v-if="packStore.openPackResult">
           <div>開包結果</div>
-          <div class="d-flex ga-2 mt-2 align-center">
+          <div class="d-flex ga-2 mt-2 align-center flex-wrap">
             <img
               v-for="card in packStore.openPackResult.cardsList"
               :key="card.cardId"

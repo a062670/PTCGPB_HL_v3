@@ -34,7 +34,7 @@ exports.init = () => {
     nextLoginAt: Date.now() + 1000 * 60 * 60 * 24 * 100,
     isLogin: false,
     isApprove: false,
-    friendList: "0/0/0",
+    friendList: [0, 0, 0],
     lastHeartbeat: 0,
   }));
   schedule();
@@ -329,8 +329,12 @@ async function getFriendList(account) {
     throw new Error("請先登入！");
   }
   const friendList = await FriendClient.ListV1(account.headers);
-  account.friendList = `${friendList.data.friendsList.length}/${friendList.data.sentFriendRequestsList.length}/${friendList.data.receivedFriendRequestsList.length}`;
-  console.log(account.id, account.friendList);
+  account.friendList = [
+    friendList.data.friendsList.length,
+    friendList.data.sentFriendRequestsList.length,
+    friendList.data.receivedFriendRequestsList.length,
+  ];
+  console.log(account.id, account.friendList.join("/"));
   emitToSocket("updateAccount", filterAccount(account));
   return friendList;
 }
@@ -597,6 +601,7 @@ function filterAccount(account) {
     isApprove: account.isApprove,
     nextLoginAt: account.nextLoginAt,
     friendList: account.friendList,
+    lastHeartbeat: account.lastHeartbeat,
   };
 }
 
@@ -649,8 +654,11 @@ function schedule() {
             await sleep(1000 * 5);
             continue;
           }
-          // 1 分鐘心跳一次
-          if (Date.now() - account.lastHeartbeat > 1000 * 60) {
+          // 心跳 1 分鐘一次，好友 >=90 不送心跳
+          if (
+            account.friendList[0] < 90 &&
+            Date.now() - account.lastHeartbeat > 1000 * 60
+          ) {
             console.log("heartbeat", account.friendId);
             heartbeat(account.friendId);
             account.lastHeartbeat = Date.now();

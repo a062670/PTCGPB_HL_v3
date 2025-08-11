@@ -652,7 +652,7 @@ function schedule() {
           // 1 分鐘心跳一次
           if (Date.now() - account.lastHeartbeat > 1000 * 60) {
             console.log("heartbeat", account.friendId);
-            await heartbeat(account.friendId);
+            heartbeat(account.friendId);
             account.lastHeartbeat = Date.now();
           }
           try {

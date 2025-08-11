@@ -42,7 +42,7 @@
           停止加好友
         </v-btn>
         <v-btn
-          v-if="!account.isApprove"
+          v-if="!account.isApprove && account.isLogin"
           color="gray"
           :loading="account.isApproving"
           @click="appStore.approve(account)"

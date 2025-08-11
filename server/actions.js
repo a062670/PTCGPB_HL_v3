@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const { sleep } = require("../lib/Units.js");
+const { heartbeat } = require("../lib/packer/index.js");
 const Grpc = require("../lib/Grpc.js");
 const Login = require("../steps/Login.js");
 const SystemClient = require("../steps/SystemClient.js");
@@ -29,10 +30,12 @@ exports.init = () => {
     ...acc,
     headers: {},
     nickname: "",
+    friendId: "",
     nextLoginAt: Date.now() + 1000 * 60 * 60 * 24 * 100,
     isLogin: false,
     isApprove: false,
     friendList: "0/0/0",
+    lastHeartbeat: 0,
   }));
   schedule();
 };
@@ -80,7 +83,9 @@ exports.doApprove = async (accountId) => {
   if (!account) {
     throw new Error("account not found");
   }
+  await rejectFriendRequest(account);
   account.isApprove = true;
+
   return filterAccount(account);
 };
 
@@ -290,6 +295,10 @@ async function getProfile(account) {
     account.headers
   );
   account.nickname = profileResponse.data.profile.profileSpine.nickname;
+  account.friendId = profileResponse.data.profile.profileSpine.friendId.replace(
+    /-/g,
+    ""
+  );
 }
 
 async function approveFriendRequest(account) {
@@ -340,6 +349,22 @@ async function deleteAllFriends(account) {
   }
   console.log("👋 清空好友列表成功！");
   await getFriendList(account);
+}
+
+async function rejectFriendRequest(account) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const friendList = await getFriendList(account);
+  const friendIds = friendList.data.receivedFriendRequestsList.map(
+    (friend) => friend.fromPlayerId
+  );
+  if (friendIds.length <= 0) {
+    console.log("👋 沒有待回復好友申請！");
+    return;
+  }
+  await FriendClient.RejectRequestsV1(account.headers, friendIds);
+  console.log("👋 拒絕好友申請成功！");
 }
 
 async function getFeedList(account) {
@@ -623,6 +648,12 @@ function schedule() {
           if (!account.isLogin || !account.isApprove) {
             await sleep(1000 * 5);
             continue;
+          }
+          // 1 分鐘心跳一次
+          if (Date.now() - account.lastHeartbeat > 1000 * 60) {
+            console.log("heartbeat", account.friendId);
+            await heartbeat(account.friendId);
+            account.lastHeartbeat = Date.now();
           }
           try {
             await approveFriendRequest(account);

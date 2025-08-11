@@ -106,7 +106,7 @@ class SocketApiService {
       const timeout = setTimeout(() => {
         console.log(`${event} 請求超時`);
         reject(new Error("請求超時"));
-      }, 10000);
+      }, 20000);
 
       // 監聽回應事件
       const responseEvent = `${event}Response`;

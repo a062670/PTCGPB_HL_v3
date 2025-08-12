@@ -698,6 +698,7 @@ function schedule() {
             heartbeat(account.friendId);
             account.lastHeartbeat = Date.now();
           }
+          const startAt = Date.now();
           try {
             await approveFriendRequest(account);
           } catch (error) {
@@ -710,7 +711,7 @@ function schedule() {
             // 通知 socket
             emitToSocket("updateAccount", filterAccount(account));
           }
-          await sleep(1000 * 5);
+          await sleep(Math.max(1, 5000 - (Date.now() - startAt)));
         } catch (error) {
           console.error(
             `帳號 [${account.id}] 加好友排程發生未預期錯誤:`,

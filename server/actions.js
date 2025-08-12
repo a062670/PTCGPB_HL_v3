@@ -691,7 +691,7 @@ function schedule() {
           }
           // 心跳 1 分鐘一次，好友 >=90 不送心跳
           if (
-            account.friendList[0] < 90 &&
+            account.friendList.count[0] < 90 &&
             Date.now() - account.lastHeartbeat > 1000 * 60
           ) {
             console.log("heartbeat", account.friendId);

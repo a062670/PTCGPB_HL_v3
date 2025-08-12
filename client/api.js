@@ -133,6 +133,11 @@ class SocketApiService {
     });
   }
 
+  // 取得版本號
+  async getVersion() {
+    return this.request("getVersion", null);
+  }
+
   // 帳號相關 API
   async getAccounts() {
     return this.request("getAccounts", null);

@@ -10,6 +10,7 @@ export const useAppStore = defineStore("app", () => {
   const title = ref("PTCGPB_HL_v3");
   const drawer = ref(true);
   const loading = ref(false);
+  const version = ref("");
 
   // 帳號相關狀態
   const accounts = ref([]);
@@ -58,6 +59,9 @@ export const useAppStore = defineStore("app", () => {
   const loadAccounts = async () => {
     try {
       setLoading(true);
+      const versionResult = await socketApiService.getVersion();
+      version.value = versionResult.data;
+
       const result = await socketApiService.getAccounts();
       const accountsData = result.data?.accounts || [];
       accounts.value = accountsData.map((account) => ({
@@ -138,6 +142,7 @@ export const useAppStore = defineStore("app", () => {
     title,
     drawer,
     loading,
+    version,
     accounts,
     selectedAccountId,
     showType,

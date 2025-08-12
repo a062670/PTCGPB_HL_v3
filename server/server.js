@@ -6,6 +6,7 @@ const { Server } = require("socket.io");
 const actions = require("./actions");
 
 const mainConfig = require("../config/main.json");
+const versionConfig = require("../config/version.json");
 
 actions.init();
 
@@ -114,6 +115,13 @@ io.on("connection", (socket) => {
 
   // 設置 socket 實例到 actions
   actions.setSocket(socket);
+
+  // 取得版本號
+  socket.on("getVersion", async (data) => {
+    await handleSocketEvent(socket, "getVersion", () => {
+      return versionConfig.version;
+    });
+  });
 
   // 獲取帳號列表
   socket.on("getAccounts", async (data) => {

@@ -19,6 +19,9 @@ export const useAppStore = defineStore("app", () => {
   // 資料相關
   const showType = ref("");
 
+  const isGettingFriendList = ref(false);
+  const isDeletingFriends = ref(false);
+
   // 計算屬性
   const selectedAccount = computed(() => {
     return (
@@ -114,6 +117,18 @@ export const useAppStore = defineStore("app", () => {
     account.isApproving = false;
   };
 
+  const getFriendList = async (account) => {
+    isGettingFriendList.value = true;
+    await socketApiService.getFriendList(account.id);
+    isGettingFriendList.value = false;
+  };
+
+  const deleteFriend = async (account, playerId) => {
+    isDeletingFriends.value = true;
+    await socketApiService.deleteFriend(account.id, playerId);
+    isDeletingFriends.value = false;
+  };
+
   const deleteAllFriends = async (account) => {
     account.isDeletingFriends = true;
     const result = await socketApiService.deleteAllFriends(account.id);
@@ -145,7 +160,11 @@ export const useAppStore = defineStore("app", () => {
     version,
     accounts,
     selectedAccountId,
+
     showType,
+
+    isGettingFriendList,
+    isDeletingFriends,
 
     // 計算屬性
     selectedAccount,
@@ -158,6 +177,8 @@ export const useAppStore = defineStore("app", () => {
     logout,
     approve,
     stopApprove,
+    getFriendList,
+    deleteFriend,
     deleteAllFriends,
     selectAccount,
     clearSelectedAccount,

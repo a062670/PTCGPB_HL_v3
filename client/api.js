@@ -163,6 +163,16 @@ class SocketApiService {
     return this.request("stopApprove", { id: accountId });
   }
 
+  // 取得好友列表
+  async getFriendList(accountId) {
+    return this.request("getFriendList", { id: accountId });
+  }
+
+  // 刪除好友
+  async deleteFriend(accountId, playerId) {
+    return this.request("deleteFriend", { id: accountId, playerId });
+  }
+
   // 刪除所有好友
   async deleteAllFriends(accountId) {
     return this.request("deleteAllFriends", { id: accountId });

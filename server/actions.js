@@ -34,7 +34,12 @@ exports.init = () => {
     nextLoginAt: Date.now() + 1000 * 60 * 60 * 24 * 100,
     isLogin: false,
     isApprove: false,
-    friendList: [0, 0, 0],
+    friendList: {
+      count: [0, 0, 0],
+      friendsList: [],
+      sentFriendRequestsList: [],
+      receivedFriendRequestsList: [],
+    },
     lastHeartbeat: 0,
   }));
   schedule();
@@ -96,6 +101,23 @@ exports.doStopApprove = async (accountId) => {
   }
   account.isApprove = false;
   return filterAccount(account);
+};
+
+exports.doGetFriendList = async (accountId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  return await getFriendList(account);
+};
+
+exports.doDeleteFriend = async (accountId, playerId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  await deleteFriend(account, playerId);
+  return;
 };
 
 exports.doDeleteAllFriends = async (accountId) => {
@@ -329,14 +351,27 @@ async function getFriendList(account) {
     throw new Error("請先登入！");
   }
   const friendList = await FriendClient.ListV1(account.headers);
-  account.friendList = [
-    friendList.data.friendsList.length,
-    friendList.data.sentFriendRequestsList.length,
-    friendList.data.receivedFriendRequestsList.length,
-  ];
-  console.log(account.id, account.friendList.join("/"));
+  account.friendList = {
+    friendsList: friendList.data.friendsList,
+    sentFriendRequestsList: friendList.data.sentFriendRequestsList,
+    receivedFriendRequestsList: friendList.data.receivedFriendRequestsList,
+    count: [
+      friendList.data.friendsList.length,
+      friendList.data.sentFriendRequestsList.length,
+      friendList.data.receivedFriendRequestsList.length,
+    ],
+  };
+  console.log(account.id, account.friendList.count.join("/"));
   emitToSocket("updateAccount", filterAccount(account));
   return friendList;
+}
+
+async function deleteFriend(account, playerId) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  await FriendClient.DeleteV1(account.headers, [playerId]);
+  await getFriendList(account);
 }
 
 async function deleteAllFriends(account) {

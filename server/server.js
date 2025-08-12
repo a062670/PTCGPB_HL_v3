@@ -169,6 +169,24 @@ io.on("connection", (socket) => {
     });
   });
 
+  // 取得好友列表
+  socket.on("getFriendList", async (data) => {
+    console.log("收到 getFriendList 請求");
+    const friendList = await actions.doGetFriendList(data.id);
+    await handleSocketEvent(socket, "getFriendList", () => {
+      return friendList;
+    });
+  });
+
+  // 刪除好友
+  socket.on("deleteFriend", async (data) => {
+    console.log("收到 deleteFriend 請求");
+    await actions.doDeleteFriend(data.id, data.playerId);
+    await handleSocketEvent(socket, "deleteFriend", () => {
+      return {};
+    });
+  });
+
   // 刪除所有好友
   socket.on("deleteAllFriends", async (data) => {
     console.log("收到 deleteAllFriends 請求");

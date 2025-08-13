@@ -257,7 +257,11 @@
               </v-btn>
             </div>
           </div>
-          <CardList :cards="feed.cardsList" card-type="card" />
+          <CardList
+            :cardStore="appStore.selectedAccount.playerResources.cardStocks"
+            :cards="feed.cardsList"
+            card-type="card"
+          />
         </div>
       </div>
       <!-- 得卡 -->
@@ -265,6 +269,7 @@
         <div>得卡</div>
         <div v-if="feedStore.feedSnoopResult">
           <CardList
+            :cardStore="appStore.selectedAccount.playerResources.cardStocks"
             :cards="feedStore.feedSnoopResult.contents.cardsList"
             card-type="card"
           />
@@ -292,7 +297,11 @@
             class="d-flex ga-2 mt-2 align-center flex-wrap"
           >
             <div>得卡結果</div>
-            <CardList :cards="feedStore.feedChallengeResult" card-type="card" />
+            <CardList
+              :cardStore="appStore.selectedAccount.playerResources.cardStocks"
+              :cards="feedStore.feedChallengeResult"
+              card-type="card"
+            />
           </div>
         </div>
       </div>
@@ -354,6 +363,7 @@
             v-if="presentBoxStore.receivePresentBoxResult.result.itemAcquisitionResult?.acquiredItems?.cardInstancesList"
           >
             <CardList
+              :cardStore="appStore.selectedAccount.playerResources.cardStocks"
               :cards="presentBoxStore.receivePresentBoxResult.result.itemAcquisitionResult.acquiredItems.cardInstancesList"
               card-type="cardInstance"
             />
@@ -441,6 +451,7 @@
           <div>開包結果</div>
           <div class="d-flex ga-2 mt-2 align-center flex-wrap">
             <CardList
+              :cardStore="appStore.selectedAccount.playerResources.cardStocks"
               :cards="packStore.openPackResult.cardsList"
               card-type="cardInstance"
             />

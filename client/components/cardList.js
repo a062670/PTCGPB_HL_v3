@@ -7,6 +7,10 @@
 const CardListComponent = {
   name: "CardList",
   props: {
+    cardStore: {
+      type: Array,
+      default: () => [],
+    },
     cards: {
       type: Array,
       required: true,
@@ -64,6 +68,12 @@ const CardListComponent = {
             width="100"
             :class="getCardClasses(card)"
           />
+          <div
+            v-if="cardStore.length > 0 && !cardStore.some((item) => item === card.cardId)"
+            class="position-absolute top-0 right-0 bg-warning text-white rounded-circle px-1"
+          >
+            NEW
+          </div>
         </div>
       </template>
       <div v-else-if="showEmpty" class="text-muted">

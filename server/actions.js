@@ -138,12 +138,12 @@ exports.doGetFeedList = async (accountId) => {
 };
 
 /** 補充得卡力 */
-exports.doHealChallengePower = async (accountId, type, amount) => {
+exports.doHealChallengePower = async (accountId, type, amount, vcAmount) => {
   const account = accounts.find((acc) => acc.id === accountId);
   if (!account) {
     throw new Error("account not found");
   }
-  return await healChallengePower(account, type, amount);
+  return await healChallengePower(account, type, amount, vcAmount);
 };
 
 /** 開始得卡 */
@@ -435,11 +435,16 @@ async function getFeedList(account) {
 }
 
 /** 補充得卡力 */
-async function healChallengePower(account, type, amount) {
+async function healChallengePower(account, type, amount, vcAmount) {
   if (!account.headers["x-takasho-session-token"]) {
     throw new Error("請先登入！");
   }
-  await FeedClient.HealChallengePowerV1(account.headers, type, amount);
+  await FeedClient.HealChallengePowerV1(
+    account.headers,
+    type,
+    amount,
+    vcAmount
+  );
 }
 
 /** 開始得卡 */

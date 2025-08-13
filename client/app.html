@@ -179,13 +179,21 @@
           <div>自動回復: {{ feedStore.challengePower.nextAutoHealedAt }}</div>
           <div
             v-if="feedStore.challengePower.amount < feedStore.challengePower.autoHealLimit"
+            class="d-flex ga-2"
           >
             <v-btn
               color="primary"
               :loading="feedStore.isHealingChallengePower"
-              @click="feedStore.healChallengePower(appStore.selectedAccount)"
+              @click="feedStore.healChallengePower(appStore.selectedAccount, feedStore.challengePower.needCountOfCharger, 0)"
             >
-              補一個(沙漏: {{feedStore.challengePower.needCountOfLarge}})
+              補一個(沙漏: {{feedStore.challengePower.needCountOfCharger}})
+            </v-btn>
+            <v-btn
+              color="primary"
+              :loading="feedStore.isHealingChallengePower"
+              @click="feedStore.healChallengePower(appStore.selectedAccount, 0, feedStore.challengePower.needCountOfVc)"
+            >
+              補一個(金塊: {{feedStore.challengePower.needCountOfVc}})
             </v-btn>
           </div>
         </div>

@@ -184,8 +184,13 @@ class SocketApiService {
   }
 
   // 補充得卡力
-  async healChallengePower(accountId, type, amount) {
-    return this.request("healChallengePower", { id: accountId, type, amount });
+  async healChallengePower(accountId, type, amount, vcAmount) {
+    return this.request("healChallengePower", {
+      id: accountId,
+      type,
+      amount,
+      vcAmount,
+    });
   }
 
   // 開始得卡

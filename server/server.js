@@ -208,7 +208,12 @@ io.on("connection", (socket) => {
   // 補充得卡力
   socket.on("healChallengePower", async (data) => {
     console.log("收到 healChallengePower 請求");
-    await actions.doHealChallengePower(data.id, data.type, data.amount);
+    await actions.doHealChallengePower(
+      data.id,
+      data.type,
+      data.amount,
+      data.vcAmount
+    );
     await handleSocketEvent(socket, "healChallengePower", () => {
       return {};
     });

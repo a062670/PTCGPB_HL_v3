@@ -24,7 +24,10 @@ export const useFeedStore = defineStore("feed", () => {
     const result = await socketApiService.getFeedList(account.id);
     feedList.value = result.data.list;
     renewAfter.value = new Date(result.data.renewAfter * 1000).toLocaleString();
-    feedList.value.sort((a, b) => b.challengeInfo.requireFeedStamina - a.challengeInfo.requireFeedStamina);
+    feedList.value.sort(
+      (a, b) =>
+        b.challengeInfo.requireFeedStamina - a.challengeInfo.requireFeedStamina
+    );
     feedList.value.sort((a, b) => {
       if (a.isFriend && !b.isFriend) return -1;
       if (!a.isFriend && b.isFriend) return 1;
@@ -33,24 +36,29 @@ export const useFeedStore = defineStore("feed", () => {
     const { amount, nextAutoHealedAt } = computePower(
       result.data.challengePower
     );
-    const needCountOfLarge = Math.ceil(
+    const needCountOfCharger = Math.ceil(
       (nextAutoHealedAt * 1000 - Date.now()) / (1000 * 60 * 60)
+    );
+    const needCountOfVc = Math.ceil(
+      (nextAutoHealedAt * 1000 - Date.now()) / (1000 * 60 * 60 * 2)
     );
     challengePower.value = {
       ...result.data.challengePower,
       amount,
       nextAutoHealedAt: new Date(nextAutoHealedAt * 1000).toLocaleString(),
-      needCountOfLarge,
+      needCountOfCharger,
+      needCountOfVc,
     };
     account.isGettingFeedList = false;
   };
 
-  const healChallengePower = async (account) => {
+  const healChallengePower = async (account, chargerAmount, vcAmount) => {
     isHealingChallengePower.value = true;
     await socketApiService.healChallengePower(
       account.id,
       1,
-      challengePower.value.needCountOfLarge
+      chargerAmount,
+      vcAmount
     );
     isHealingChallengePower.value = false;
     getFeedList(account);

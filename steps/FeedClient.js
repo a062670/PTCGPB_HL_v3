@@ -123,25 +123,27 @@ const ShareV1 = async (headers, transactionId) => {
   return;
 };
 
-const HealChallengePowerV1 = async (headers, type, amount) => {
+const HealChallengePowerV1 = async (headers, type, amount, vcAmount = 0) => {
   const request =
     new FeedHealChallengePowerV1Proto.FeedHealChallengePowerV1.Types.Request();
   request.setTransactionId(createUuidV4());
 
   const challengePowerHealItems =
     new ChallengePowerHealItemsProto.ChallengePowerHealItems();
-  challengePowerHealItems.setVcAmount(0);
+  challengePowerHealItems.setVcAmount(vcAmount);
 
-  const challengePowerCharger =
-    new ChallengePowerChargerProto.ChallengePowerCharger();
-  challengePowerCharger.setAmount(amount);
-  // 目前固定使用沙漏
-  challengePowerCharger.setType(
-    ChallengePowerChargerProto.ChallengePowerCharger.Types.Type.TYPE_LARGE
-  );
-
-  challengePowerHealItems.setChargersList([challengePowerCharger]);
-
+  // 使用沙漏
+  if (amount > 0) {
+    const challengePowerCharger =
+      new ChallengePowerChargerProto.ChallengePowerCharger();
+    challengePowerCharger.setAmount(amount);
+    challengePowerCharger.setType(
+      ChallengePowerChargerProto.ChallengePowerCharger.Types.Type.TYPE_LARGE
+    );
+    challengePowerHealItems.setChargersList([challengePowerCharger]);
+  } else {
+    challengePowerHealItems.setChargersList([]);
+  }
   request.setItems(challengePowerHealItems);
 
   const bytes = request.serializeBinary();

@@ -6,6 +6,8 @@ import { useEventBattleStore } from "./stores/eventBattle.js";
 import { usePackStore } from "./stores/pack.js";
 import { useItemShopStore } from "./stores/itemShop.js";
 
+import { registerCardListComponent } from "./components/cardList.js";
+
 import toastService from "./toast.js";
 
 const { ref, createApp, onMounted, computed } = Vue;
@@ -93,6 +95,9 @@ async function loadTemplate() {
 
   // 使用 Vuetify
   app.use(vuetify);
+
+  // 註冊卡片列表組件
+  registerCardListComponent(app);
 
   // 掛載應用程式
   app.mount("#app");

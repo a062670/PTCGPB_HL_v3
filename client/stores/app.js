@@ -19,6 +19,7 @@ export const useAppStore = defineStore("app", () => {
   // 資料相關
   const showType = ref("");
 
+  const isGettingPlayerResources = ref(false);
   const isGettingFriendList = ref(false);
   const isDeletingFriends = ref(false);
 
@@ -69,6 +70,11 @@ export const useAppStore = defineStore("app", () => {
       const accountsData = result.data?.accounts || [];
       accounts.value = accountsData.map((account) => ({
         ...account,
+        playerResources: {
+          cardStocks: [],
+          packPowerChargers: [],
+          challengePowerChargers: [],
+        },
         isLoggingIn: false,
         isApproving: false,
         isDeletingFriends: false,
@@ -101,6 +107,13 @@ export const useAppStore = defineStore("app", () => {
     const result = await socketApiService.logout(account.id);
     updateAccount(account, result.data);
     account.isLoggingIn = false;
+  };
+
+  const getPlayerResources = async (account) => {
+    isGettingPlayerResources.value = true;
+    const result = await socketApiService.getPlayerResources(account.id);
+    account.playerResources = result.data;
+    isGettingPlayerResources.value = false;
   };
 
   const approve = async (account) => {
@@ -163,6 +176,7 @@ export const useAppStore = defineStore("app", () => {
 
     showType,
 
+    isGettingPlayerResources,
     isGettingFriendList,
     isDeletingFriends,
 
@@ -175,6 +189,7 @@ export const useAppStore = defineStore("app", () => {
     loadAccounts,
     login,
     logout,
+    getPlayerResources,
     approve,
     stopApprove,
     getFriendList,

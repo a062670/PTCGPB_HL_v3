@@ -134,6 +134,27 @@
         >
           每日禮物
         </v-btn>
+        <v-btn
+          v-if="account.isLogin"
+          color="info"
+          :loading="account.isGettingPlayerResources"
+          @click="appStore.getPlayerResources(account)"
+        >
+          更新資源
+        </v-btn>
+      </div>
+      <div class="mt-2">
+        <div>圖鑑：{{ account.playerResources.cardStocks.length || '' }}</div>
+        <div>
+          開包力： {{
+          account.playerResources.packPowerChargers.find(item=>item.type ===
+          1)?.amount }}
+        </div>
+        <div>
+          得卡力：{{
+          account.playerResources.challengePowerChargers.find(item=>item.type
+          === 1)?.amount }}
+        </div>
       </div>
     </div>
   </v-navigation-drawer>
@@ -236,39 +257,17 @@
               </v-btn>
             </div>
           </div>
-          <div class="d-flex ga-2 mt-2 align-center flex-wrap">
-            <div
-              v-for="(card, index) in feed.cardsList"
-              :key="`${card.cardId}-${index}`"
-            >
-              <img
-                :src="`https://car-fs.gagu.dev/PackViewer/images/${card.cardId}.png`"
-                width="100"
-                :class="{ 
-                  'border-lg border-primary border-opacity-100 rounded-xl': card.disable,
-                  'border-lg border-warning border-opacity-100 rounded-xl': card.isSnooped
-                }"
-              />
-            </div>
-          </div>
+          <CardList :cards="feed.cardsList" card-type="card" />
         </div>
       </div>
       <!-- 得卡 -->
       <div v-if="appStore.showType === 'feedSnoop'">
         <div>得卡</div>
         <div v-if="feedStore.feedSnoopResult">
-          <div class="d-flex ga-2 mt-2 align-center flex-wrap">
-            <img
-              v-for="(card, index) in feedStore.feedSnoopResult.contents.cardsList"
-              :key="`${card.cardId}-${index}`"
-              :src="`https://car-fs.gagu.dev/PackViewer/images/${card.cardId}.png`"
-              width="100"
-              :class="{ 
-                'border-lg border-primary border-opacity-100 rounded-xl': card.disable,
-                'border-lg border-warning border-opacity-100 rounded-xl': card.isSnooped
-              }"
-            />
-          </div>
+          <CardList
+            :cards="feedStore.feedSnoopResult.contents.cardsList"
+            card-type="card"
+          />
           <div
             v-if="!feedStore.feedChallengeResult && feedStore.feedSnoopResult.contents.cardsList.some(card => card.isSnooped)"
             class="d-flex ga-2 mt-2 align-center flex-wrap"
@@ -293,12 +292,7 @@
             class="d-flex ga-2 mt-2 align-center flex-wrap"
           >
             <div>得卡結果</div>
-            <img
-              v-for="(card, index) in feedStore.feedChallengeResult"
-              :key="`${card.cardId}-${index}`"
-              :src="`https://car-fs.gagu.dev/PackViewer/images/${card.cardId}.png`"
-              width="100"
-            />
+            <CardList :cards="feedStore.feedChallengeResult" card-type="card" />
           </div>
         </div>
       </div>
@@ -359,10 +353,9 @@
           <div
             v-if="presentBoxStore.receivePresentBoxResult.result.itemAcquisitionResult?.acquiredItems?.cardInstancesList"
           >
-            <img
-              v-for="cardInstance in presentBoxStore.receivePresentBoxResult.result.itemAcquisitionResult.acquiredItems.cardInstancesList"
-              :src="`https://car-fs.gagu.dev/PackViewer/images/${cardInstance.cardInstance.cardId}.png`"
-              width="100"
+            <CardList
+              :cards="presentBoxStore.receivePresentBoxResult.result.itemAcquisitionResult.acquiredItems.cardInstancesList"
+              card-type="cardInstance"
             />
           </div>
         </div>
@@ -447,11 +440,9 @@
         <div v-if="packStore.openPackResult">
           <div>開包結果</div>
           <div class="d-flex ga-2 mt-2 align-center flex-wrap">
-            <img
-              v-for="card in packStore.openPackResult.cardsList"
-              :key="card.cardId"
-              :src="`https://car-fs.gagu.dev/PackViewer/images/${card.cardInstance.cardId}.png`"
-              width="100"
+            <CardList
+              :cards="packStore.openPackResult.cardsList"
+              card-type="cardInstance"
             />
           </div>
         </div>

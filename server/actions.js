@@ -15,6 +15,7 @@ const DeckClient = require("../steps/DeckClient.js");
 const SoloBattleClient = require("../steps/SoloBattleClient.js");
 const PackClient = require("../steps/PackClient.js");
 const ItemShopClient = require("../steps/ItemShopClient.js");
+const PlayerResourcesClient = require("../steps/PlayerResourcesClient.js");
 
 const mainConfig = require("../config/main.json");
 const eventBattleConfig = require("../config/eventBattle.json");
@@ -81,6 +82,14 @@ exports.doLogout = async (accountId) => {
   account.nextLoginAt = Date.now() + 1000 * 60 * 60 * 24 * 100;
 
   return filterAccount(account);
+};
+
+exports.doGetPlayerResources = async (accountId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  return await getPlayerResources(account);
 };
 
 exports.doApprove = async (accountId) => {
@@ -321,6 +330,22 @@ async function getProfile(account) {
     /-/g,
     ""
   );
+}
+
+async function getPlayerResources(account) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const playerResources = await PlayerResourcesClient.SyncV1(account.headers);
+  return {
+    cardStocks: playerResources.data.playerResources.cardStocksList.map(
+      (card) => card.cardId
+    ),
+    packPowerChargers:
+      playerResources.data.playerResources.packPowerChargersList,
+    challengePowerChargers:
+      playerResources.data.playerResources.challengePowerChargersList,
+  };
 }
 
 async function approveFriendRequest(account) {

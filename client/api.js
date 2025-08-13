@@ -153,6 +153,11 @@ class SocketApiService {
     return this.request("logout", { id: accountId });
   }
 
+  // 取得玩家資源
+  async getPlayerResources(accountId) {
+    return this.request("getPlayerResources", { id: accountId });
+  }
+
   // 加好友
   async approve(accountId) {
     return this.request("approve", { id: accountId });

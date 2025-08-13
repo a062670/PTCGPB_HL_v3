@@ -151,6 +151,15 @@ io.on("connection", (socket) => {
     });
   });
 
+  // 取得玩家資源
+  socket.on("getPlayerResources", async (data) => {
+    console.log("收到 getPlayerResources 請求");
+    const playerResources = await actions.doGetPlayerResources(data.id);
+    await handleSocketEvent(socket, "getPlayerResources", () => {
+      return playerResources;
+    });
+  });
+
   // 加好友
   socket.on("approve", async (data) => {
     console.log("收到 approve 請求");

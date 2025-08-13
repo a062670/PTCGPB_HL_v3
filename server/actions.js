@@ -336,16 +336,34 @@ async function getPlayerResources(account) {
   if (!account.headers["x-takasho-session-token"]) {
     throw new Error("請先登入！");
   }
-  const playerResources = await PlayerResourcesClient.SyncV1(account.headers);
-  return {
-    cardStocks: playerResources.data.playerResources.cardStocksList.map(
-      (card) => card.cardId
-    ),
-    packPowerChargers:
-      playerResources.data.playerResources.packPowerChargersList,
-    challengePowerChargers:
-      playerResources.data.playerResources.challengePowerChargersList,
+  const data = {
+    cardStocks: [],
+    packPowerChargers: [],
+    challengePowerChargers: [],
   };
+  let hasNext = true;
+  let cursor = "";
+  while (hasNext) {
+    console.log("cursor:", cursor);
+    const playerResources = await PlayerResourcesClient.SyncV1(
+      account.headers,
+      cursor
+    );
+    data.cardStocks.push(
+      ...playerResources.data.playerResources.cardStocksList.map(
+        (card) => card.cardId
+      )
+    );
+    data.packPowerChargers.push(
+      ...playerResources.data.playerResources.packPowerChargersList
+    );
+    data.challengePowerChargers.push(
+      ...playerResources.data.playerResources.challengePowerChargersList
+    );
+    hasNext = playerResources.data.hasNext;
+    cursor = playerResources.data.nextCursor;
+  }
+  return data;
 }
 
 async function approveFriendRequest(account) {

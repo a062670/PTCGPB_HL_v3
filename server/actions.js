@@ -21,7 +21,7 @@ const mainConfig = require("../config/main.json");
 const eventBattleConfig = require("../config/eventBattle.json");
 const packConfig = require("../config/pack.json");
 
-Grpc.setMaxRetries(1);
+Grpc.setMaxRetries(0);
 
 let accounts;
 let socketInstance = null; // 用於存儲 socket 實例

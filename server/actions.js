@@ -35,6 +35,8 @@ exports.init = () => {
     nextLoginAt: Date.now() + 1000 * 60 * 60 * 24 * 100,
     isLogin: false,
     isApprove: false,
+    approveStartAt: 0,
+    approveCount: 0,
     friendList: {
       count: [0, 0, 0],
       friendsList: [],
@@ -99,6 +101,8 @@ exports.doApprove = async (accountId) => {
   }
   await rejectFriendRequest(account);
   account.isApprove = true;
+  account.approveStartAt = Date.now();
+  account.approveCount = 0;
 
   return filterAccount(account);
 };
@@ -109,6 +113,8 @@ exports.doStopApprove = async (accountId) => {
     throw new Error("account not found");
   }
   account.isApprove = false;
+  account.approveStartAt = 0;
+  account.approveCount = 0;
   return filterAccount(account);
 };
 
@@ -393,6 +399,7 @@ async function approveFriendRequest(account) {
     promises.push(FriendClient.ApproveRequestV1(account.headers, friendId));
   }
   await Promise.allSettled(promises);
+  account.approveCount += times;
   console.log("👋 接受好友申請成功！");
 }
 
@@ -752,6 +759,11 @@ function filterAccount(account) {
     nickname: account.nickname,
     isLogin: account.isLogin,
     isApprove: account.isApprove,
+    approveStartAt: account.approveStartAt,
+    approveCount: account.approveCount,
+    approvePerMinute: Math.floor(
+      (account.approveCount / (Date.now() - account.approveStartAt)) * 1000 * 60
+    ),
     nextLoginAt: account.nextLoginAt,
     friendList: account.friendList,
     lastHeartbeat: account.lastHeartbeat,

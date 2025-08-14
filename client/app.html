@@ -18,7 +18,8 @@
       <div>{{ account.nickname }}</div>
       <div>{{ account.id }}</div>
       <div :class="{ 'text-red': account.friendList.count[0] >= 90 }">
-        好友: {{ account.friendList.count.join(" - ") }}
+        好友: {{ account.friendList.count.join("-") }} (APM: {{
+        account.approvePerMinute }})
       </div>
       <div>{{ account.lastUpdateAt }}</div>
       <div class="d-flex ga-2 flex-wrap">

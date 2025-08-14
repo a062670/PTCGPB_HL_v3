@@ -379,15 +379,13 @@ async function approveFriendRequest(account) {
     return;
   }
   // console.log(friendIds);
-  for (const idx in friendIds) {
-    const friendId = friendIds[idx];
-    try {
-      await FriendClient.ApproveRequestV1(account.headers, friendId);
-    } catch {
-      console.log("👋 接受好友申請失敗，跳出迴圈！");
-      break;
-    }
-    // console.log(`${account.id} ${Number(idx) + 1}/${friendIds.length}`);
+  const times = Math.min(
+    99 - friendList.data.friendsList.length,
+    friendIds.length
+  );
+  for (let i = 0; i < times; i++) {
+    const friendId = friendIds[i];
+    FriendClient.ApproveRequestV1(account.headers, friendId);
   }
   console.log("👋 接受好友申請成功！");
 }

@@ -344,7 +344,6 @@ async function getPlayerResources(account) {
   let hasNext = true;
   let cursor = "";
   while (hasNext) {
-    console.log("cursor:", cursor);
     const playerResources = await PlayerResourcesClient.SyncV1(
       account.headers,
       cursor

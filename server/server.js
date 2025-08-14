@@ -247,7 +247,8 @@ io.on("connection", (socket) => {
     const pickedCards = await actions.doFeedChallenge(
       data.id,
       data.feedId,
-      data.challengeType
+      data.challengeType,
+      data.feedType
     );
     await handleSocketEvent(socket, "feedChallenge", () => {
       return pickedCards;

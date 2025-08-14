@@ -16,6 +16,10 @@ const CardListComponent = {
       required: true,
       default: () => [],
     },
+    substitutionItems: {
+      type: Array,
+      default: () => [],
+    },
     cardType: {
       type: String,
       default: "card",
@@ -32,7 +36,17 @@ const CardListComponent = {
   },
   computed: {
     hasCards() {
-      return this.cards && Array.isArray(this.cards) && this.cards.length > 0;
+      if (this.cards && Array.isArray(this.cards) && this.cards.length > 0) {
+        return true;
+      }
+      if (
+        this.substitutionItems &&
+        Array.isArray(this.substitutionItems) &&
+        this.substitutionItems.length > 0
+      ) {
+        return true;
+      }
+      return false;
     },
     cardsList() {
       if (this.cardType === "cardInstance") {
@@ -54,6 +68,12 @@ const CardListComponent = {
 
       return classes;
     },
+    getItemName(name) {
+      switch (name) {
+        default:
+          return name.replace("List", "");
+      }
+    },
   },
   template: `
     <div class="d-flex ga-2 mt-2 align-center flex-wrap">
@@ -73,6 +93,13 @@ const CardListComponent = {
             class="position-absolute top-0 right-0 bg-warning text-white rounded-circle px-1"
           >
             NEW
+          </div>
+        </div>
+        <div v-for="(item, idx) in substitutionItems" :key="idx">
+          <div :class="getCardClasses(item)" style="width: 200px;">
+            <div v-for="(_item, idx) in item.item" :key="idx">
+              {{ getItemName(_item.name) }} ({{ _item.amount }})
+            </div>
           </div>
         </div>
       </template>

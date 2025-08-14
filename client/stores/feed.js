@@ -78,16 +78,17 @@ export const useFeedStore = defineStore("feed", () => {
     if (
       !feedSnoopResult.value.contents.cardsList.some((card) => card.isSnooped)
     ) {
-      feedChallenge(account, feedId, 3);
+      feedChallenge(account, feedId, 3, usedForRevivalChallengePower ? 1 : 3);
     }
   };
 
-  const feedChallenge = async (account, feedId, challengeType) => {
+  const feedChallenge = async (account, feedId, challengeType, feedType) => {
     isFeedChallenging.value = true;
     const result = await socketApiService.feedChallenge(
       account.id,
       feedId,
-      challengeType
+      challengeType,
+      feedType
     );
     feedChallengeResult.value = result.data;
     isFeedChallenging.value = false;

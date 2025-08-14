@@ -208,11 +208,12 @@ class SocketApiService {
   }
 
   // 得卡選卡
-  async feedChallenge(accountId, feedId, challengeType) {
+  async feedChallenge(accountId, feedId, challengeType, feedType) {
     return this.request("feedChallenge", {
       id: accountId,
       feedId,
       challengeType,
+      feedType,
     });
   }
 

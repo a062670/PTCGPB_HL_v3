@@ -169,12 +169,17 @@ exports.doFeedSnoop = async (
 };
 
 /** 得卡選卡 */
-exports.doFeedChallenge = async (accountId, feedId, challengeType) => {
+exports.doFeedChallenge = async (
+  accountId,
+  feedId,
+  challengeType,
+  feedType
+) => {
   const account = accounts.find((acc) => acc.id === accountId);
   if (!account) {
     throw new Error("account not found");
   }
-  return await feedChallenge(account, feedId, challengeType);
+  return await feedChallenge(account, feedId, challengeType, feedType);
 };
 
 exports.doGetPresentBoxList = async (accountId) => {
@@ -466,9 +471,36 @@ async function getFeedList(account) {
       challengeInfo: feed.challengeInfo,
       disable: feed.contents.cardsList.some((card) => card.disable),
     }));
+  const freeList = renewTimelineV1Response.data.timeline.freeFeedsList.map(
+    (feed) => ({
+      someoneFeedId: feed.freeFeedId,
+      nickname: "免費得卡",
+      cardsList: feed.contents.cardsList,
+      substitutionItemsList: feed.contents.substitutionItemsList.map((item) => {
+        const filteredItem = [];
+        for (const key in item.item) {
+          for (const _item of item.item[key]) {
+            filteredItem.push({
+              amount: _item.amount,
+              name: key,
+            });
+          }
+        }
+        return {
+          ...item,
+          item: filteredItem,
+        };
+      }),
+      isFriend: true,
+      challengeInfo: feed.challengeInfo,
+      disable:
+        feed.contents.cardsList.some((card) => card.disable) ||
+        feed.contents.substitutionItemsList.some((item) => item.disable),
+    })
+  );
   const renewAfter = renewTimelineV1Response.data.timeline.renewAfter.seconds;
   return {
-    list,
+    list: [...list, ...freeList],
     renewAfter,
     challengePower: renewTimelineV1Response.data.challengePower,
   };
@@ -497,24 +529,60 @@ async function feedSnoop(account, feedId, usedForRevivalChallengePower) {
     feedId,
     usedForRevivalChallengePower
   );
-  console.log(snoopResponse.data.timeline.someoneFeedsList);
-  return snoopResponse.data.timeline.someoneFeedsList.find((feed) => {
-    console.log(feed.someoneFeedId, feedId);
+  let find = snoopResponse.data.timeline.someoneFeedsList.find((feed) => {
     return feed.someoneFeedId === feedId;
   });
+  if (!find) {
+    find = snoopResponse.data.timeline.freeFeedsList.find((feed) => {
+      return feed.freeFeedId === feedId;
+    });
+  }
+
+  if (find) {
+    find.contents.substitutionItemsList =
+      find.contents.substitutionItemsList.map((item) => {
+        const filteredItem = [];
+        for (const key in item.item) {
+          for (const _item of item.item[key]) {
+            filteredItem.push({
+              amount: _item.amount,
+              name: key,
+            });
+          }
+        }
+        return {
+          ...item,
+          item: filteredItem,
+        };
+      });
+  }
+  return find;
 }
 
 /** 得卡選卡 */
-async function feedChallenge(account, feedId, challengeType) {
+async function feedChallenge(account, feedId, challengeType, feedType) {
   if (!account.headers["x-takasho-session-token"]) {
     throw new Error("請先登入！");
   }
   const challengeResponse = await FeedClient.ChallengeV2(
     account.headers,
     feedId,
-    challengeType
+    challengeType,
+    feedType
   );
-  return challengeResponse.data.pickedCardsList;
+  const item = [];
+  for (const key in challengeResponse.data.pickedSubstitutionItem) {
+    for (const _item of challengeResponse.data.pickedSubstitutionItem[key]) {
+      item.push({
+        amount: _item.amount,
+        name: key,
+      });
+    }
+  }
+  return {
+    cardsList: challengeResponse.data.pickedCardsList,
+    substitutionItemsList: [{ item }],
+  };
 }
 
 async function getPresentBoxList(account) {

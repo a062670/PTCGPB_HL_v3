@@ -249,7 +249,7 @@
                   feedStore.feedSnoop(
                     appStore.selectedAccount,
                     feed.someoneFeedId,
-                    feed.challengeInfo.usedForRevivalChallengePower
+                    feed.challengeInfo.requireFeedStamina
                   )
                 "
               >
@@ -260,6 +260,7 @@
           <CardList
             :cardStore="appStore.selectedAccount.playerResources.cardStocks"
             :cards="feed.cardsList"
+            :substitutionItems="feed.substitutionItemsList"
             card-type="card"
           />
         </div>
@@ -271,23 +272,24 @@
           <CardList
             :cardStore="appStore.selectedAccount.playerResources.cardStocks"
             :cards="feedStore.feedSnoopResult.contents.cardsList"
+            :substitutionItems="feedStore.feedSnoopResult.contents.substitutionItemsList"
             card-type="card"
           />
           <div
-            v-if="!feedStore.feedChallengeResult && feedStore.feedSnoopResult.contents.cardsList.some(card => card.isSnooped)"
+            v-if="!feedStore.feedChallengeResult && (feedStore.feedSnoopResult.contents.cardsList.some(card => card.isSnooped) || feedStore.feedSnoopResult.contents.substitutionItemsList.some(item => item.isSnooped))"
             class="d-flex ga-2 mt-2 align-center flex-wrap"
           >
             <v-btn
               color="warning"
               :loading="feedStore.isFeedChallenging"
-              @click="feedStore.feedChallenge(appStore.selectedAccount, feedStore.feedSnoopResult.someoneFeedId, 1)"
+              @click="feedStore.feedChallenge(appStore.selectedAccount, feedStore.feedSnoopResult.someoneFeedId, 1, feedStore.feedSnoopResult.challengeInfo.remainingCount ? 1 : 3)"
             >
               就這張
             </v-btn>
             <v-btn
               color="primary"
               :loading="feedStore.isFeedChallenging"
-              @click="feedStore.feedChallenge(appStore.selectedAccount, feedStore.feedSnoopResult.someoneFeedId, 2)"
+              @click="feedStore.feedChallenge(appStore.selectedAccount, feedStore.feedSnoopResult.someoneFeedId, 2, feedStore.feedSnoopResult.challengeInfo.remainingCount ? 1 : 3)"
             >
               另一張
             </v-btn>
@@ -299,7 +301,8 @@
             <div>得卡結果</div>
             <CardList
               :cardStore="appStore.selectedAccount.playerResources.cardStocks"
-              :cards="feedStore.feedChallengeResult"
+              :cards="feedStore.feedChallengeResult.cardsList"
+              :substitutionItems="feedStore.feedChallengeResult.substitutionItemsList"
               card-type="card"
             />
           </div>

@@ -42,7 +42,11 @@ const RenewTimelineV1 = async (headers) => {
 
 const SnoopV1 = async (headers, feedId, usedForRevivalChallengePower = 1) => {
   const request = new FeedSnoopV1Proto.FeedSnoopV1.Types.Request();
-  request.setFeedType(FeedTypeProto.FeedType.FEED_TYPE_SOMEONE);
+  if (!usedForRevivalChallengePower) {
+    request.setFeedType(FeedTypeProto.FeedType.FEED_TYPE_FREE);
+  } else {
+    request.setFeedType(FeedTypeProto.FeedType.FEED_TYPE_SOMEONE);
+  }
   request.setFeedId(feedId);
   request.setUsedForRevivalChallengePower(usedForRevivalChallengePower);
 
@@ -69,9 +73,22 @@ const SnoopV1 = async (headers, feedId, usedForRevivalChallengePower = 1) => {
 };
 
 /** challengeType: 1:偷偷看 3:一般 */
-const ChallengeV2 = async (headers, feedId, challengeType) => {
+const ChallengeV2 = async (headers, feedId, challengeType, feedType) => {
   const request = new FeedChallengeV2Proto.FeedChallengeV2.Types.Request();
-  request.setFeedType(FeedTypeProto.FeedType.FEED_TYPE_SOMEONE);
+  switch (feedType) {
+    case 1:
+      request.setFeedType(FeedTypeProto.FeedType.FEED_TYPE_SOMEONE);
+      break;
+    case 2:
+      request.setFeedType(FeedTypeProto.FeedType.FEED_TYPE_LUCKY);
+      break;
+    case 3:
+      request.setFeedType(FeedTypeProto.FeedType.FEED_TYPE_FREE);
+      break;
+    default:
+      request.setFeedType(FeedTypeProto.FeedType.FEED_TYPE_SOMEONE);
+      break;
+  }
   request.setFeedId(feedId);
   let challengeTypeEnum;
   switch (challengeType) {

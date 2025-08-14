@@ -70,6 +70,10 @@ const CardListComponent = {
     },
     getItemName(name) {
       switch (name) {
+        case "challengePowerChargersList":
+          return "得卡沙漏";
+        case "rewardTicketsList":
+          return "活動券";
         default:
           return name.replace("List", "");
       }

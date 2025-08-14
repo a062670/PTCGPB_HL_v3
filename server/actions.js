@@ -99,7 +99,7 @@ exports.doApprove = async (accountId) => {
   if (!account) {
     throw new Error("account not found");
   }
-  await rejectFriendRequest(account);
+  // await rejectFriendRequest(account);
   account.isApprove = true;
   account.approveStartAt = Date.now();
   account.approveCount = 0;

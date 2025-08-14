@@ -387,10 +387,12 @@ async function approveFriendRequest(account) {
     99 - friendList.data.friendsList.length,
     friendIds.length
   );
+  const promises = [];
   for (let i = 0; i < times; i++) {
     const friendId = friendIds[i];
-    FriendClient.ApproveRequestV1(account.headers, friendId);
+    promises.push(FriendClient.ApproveRequestV1(account.headers, friendId));
   }
+  await Promise.allSettled(promises);
   console.log("👋 接受好友申請成功！");
 }
 

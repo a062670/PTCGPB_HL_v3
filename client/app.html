@@ -26,7 +26,7 @@
         <v-btn
           v-if="account.isLogin"
           color="info"
-          :loading="account.isLoggingIn"
+          :loading="appStore.isLoggingIn"
           @click="appStore.logout(account)"
         >
           登出
@@ -34,7 +34,7 @@
         <v-btn
           v-if="!account.isLogin"
           color="gray"
-          :loading="account.isLoggingIn"
+          :loading="appStore.isLoggingIn"
           @click="appStore.login(account)"
         >
           登入
@@ -42,7 +42,7 @@
         <v-btn
           v-if="account.isApprove"
           color="primary"
-          :loading="account.isApproving"
+          :loading="appStore.isApproving"
           @click="appStore.stopApprove(account)"
         >
           停止加好友
@@ -50,10 +50,26 @@
         <v-btn
           v-if="!account.isApprove && account.isLogin"
           color="gray"
-          :loading="account.isApproving"
+          :loading="appStore.isApproving"
           @click="appStore.approve(account)"
         >
           開始加好友
+        </v-btn>
+        <v-btn
+          v-if="account.isFreeFeed"
+          color="primary"
+          :loading="appStore.isFreeFeeding"
+          @click="appStore.stopFreeFeed(account)"
+        >
+          停止免費得卡
+        </v-btn>
+        <v-btn
+          v-if="!account.isFreeFeed && account.isLogin"
+          color="gray"
+          :loading="appStore.isFreeFeeding"
+          @click="appStore.startFreeFeed(account)"
+        >
+          開始免費得卡
         </v-btn>
         <v-btn
           v-if="account.isLogin"
@@ -70,7 +86,7 @@
         <v-btn
           v-if="account.isLogin"
           color="warning"
-          :loading="account.isDeletingFriends"
+          :loading="appStore.isDeletingFriends"
           @click="appStore.deleteAllFriends(account)"
         >
           刪除好友
@@ -78,7 +94,7 @@
         <v-btn
           v-if="account.isLogin"
           color="info"
-          :loading="account.isGettingFeedList"
+          :loading="feedStore.isGettingFeedList"
           @click="
             appStore.showType = 'feedList';
             feedStore.clearAll();
@@ -91,7 +107,7 @@
         <v-btn
           v-if="account.isLogin"
           color="info"
-          :loading="account.isGettingPresentBoxList"
+          :loading="presentBoxStore.isGettingPresentBoxList"
           @click="
             appStore.showType = 'presentBoxList';
             presentBoxStore.clearAll();
@@ -138,7 +154,7 @@
         <v-btn
           v-if="account.isLogin"
           color="info"
-          :loading="account.isGettingPlayerResources"
+          :loading="appStore.isGettingPlayerResources"
           @click="appStore.getPlayerResources(account)"
         >
           更新資源
@@ -155,6 +171,26 @@
           得卡沙漏：{{
           account.playerResources.challengePowerChargers.find(item=>item.type
           === 1)?.amount }}
+        </div>
+        <div>免費得卡紀錄</div>
+        <div v-if="account.freeFeedCount && account.freeFeedStartAt">
+          <div>
+            開始: {{ new Date(account.freeFeedStartAt).toLocaleString() }}
+          </div>
+          <div>
+            最後:
+            <span v-if="account.freeFeedLastAt">
+              {{ new Date(account.freeFeedLastAt).toLocaleString() }}
+            </span>
+          </div>
+          <div v-for="item in account.freeFeedCount" :key="item.name">
+            <span v-if="item.name === 'challengePowerChargersList'">
+              得卡沙漏
+            </span>
+            <span v-else-if="item.name === 'rewardTicketsList'"> 活動券 </span>
+            <span v-else>{{ item.name.replace('List', '') }} </span>
+            ({{ item.amount }})
+          </div>
         </div>
       </div>
     </div>

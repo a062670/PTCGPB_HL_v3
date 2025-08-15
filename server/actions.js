@@ -37,6 +37,10 @@ exports.init = () => {
     isApprove: false,
     approveStartAt: 0,
     approveCount: 0,
+    isFreeFeed: false,
+    freeFeedStartAt: 0,
+    freeFeedLastAt: 0,
+    freeFeedCount: [],
     friendList: {
       count: [0, 0, 0],
       friendsList: [],
@@ -115,6 +119,27 @@ exports.doStopApprove = async (accountId) => {
   account.isApprove = false;
   account.approveStartAt = 0;
   account.approveCount = 0;
+  return filterAccount(account);
+};
+
+exports.doStartFreeFeed = async (accountId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  account.isFreeFeed = true;
+  account.freeFeedCount = [];
+  account.freeFeedStartAt = Date.now();
+  account.freeFeedLastAt = 0;
+  return filterAccount(account);
+};
+
+exports.doStopFreeFeed = async (accountId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  account.isFreeFeed = false;
   return filterAccount(account);
 };
 
@@ -764,6 +789,10 @@ function filterAccount(account) {
     approvePerMinute: Math.floor(
       (account.approveCount / (Date.now() - account.approveStartAt)) * 1000 * 60
     ),
+    isFreeFeed: account.isFreeFeed,
+    freeFeedStartAt: account.freeFeedStartAt,
+    freeFeedLastAt: account.freeFeedLastAt,
+    freeFeedCount: account.freeFeedCount,
     nextLoginAt: account.nextLoginAt,
     friendList: account.friendList,
     lastHeartbeat: account.lastHeartbeat,
@@ -847,7 +876,79 @@ function schedule() {
             `帳號 [${account.id}] 加好友排程發生未預期錯誤:`,
             error
           );
-          await sleep(1000 * 60 * 5); // 發生錯誤時等待5分鐘
+          await sleep(1000 * 5); // 發生錯誤時等待5秒
+        }
+      }
+    })();
+  }
+
+  // 免費得卡
+  for (const account of accounts) {
+    (async () => {
+      while (1) {
+        try {
+          if (!account.isLogin || !account.isFreeFeed) {
+            // 10 分鐘
+            // await sleep(1000 * 60 * 10);
+            await sleep(1000 * 10);
+            continue;
+          }
+          const feedList = await getFeedList(account);
+          const freeFeedList = feedList.list.filter(
+            (feed) =>
+              feed.challengeInfo.requireFeedStamina === 0 &&
+              !feed.disable &&
+              feed.challengeInfo.endAt.seconds * 1000 > Date.now()
+          );
+          for (const feed of freeFeedList) {
+            if (!feed.challengeInfo.isSnooping) {
+              await feedSnoop(account, feed.someoneFeedId, 0);
+            }
+            const challengeResponse = await feedChallenge(
+              account,
+              feed.someoneFeedId,
+              3,
+              3
+            );
+            for (const card of challengeResponse.cardsList) {
+              const findCard = account.freeFeedCount.find(
+                (i) => i.name === card.cardId
+              );
+              if (findCard) {
+                findCard.amount += 1;
+              } else {
+                account.freeFeedCount.push({
+                  name: card.cardId,
+                  amount: 1,
+                });
+              }
+            }
+            for (const items of challengeResponse.substitutionItemsList) {
+              for (const item of items.item) {
+                const amount = item.amount || 1;
+                const findItem = account.freeFeedCount.find(
+                  (i) => i.name === item.name
+                );
+                if (findItem) {
+                  findItem.amount += amount;
+                } else {
+                  account.freeFeedCount.push({
+                    name: item.name,
+                    amount: amount,
+                  });
+                }
+              }
+            }
+          }
+          account.freeFeedLastAt = Date.now();
+          emitToSocket("updateAccount", filterAccount(account));
+          await sleep(1000 * 60 * 10);
+        } catch (error) {
+          console.error(
+            `帳號 [${account.id}] 免費得卡排程發生未預期錯誤:`,
+            error
+          );
+          await sleep(1000 * 60 * 10);
         }
       }
     })();

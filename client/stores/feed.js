@@ -15,12 +15,13 @@ export const useFeedStore = defineStore("feed", () => {
   const feedSnoopResult = ref(null);
   const feedChallengeResult = ref(null);
 
+  const isGettingFeedList = ref(false);
   const isHealingChallengePower = ref(false);
   const isFeedSnooping = ref(false);
   const isFeedChallenging = ref(false);
 
   const getFeedList = async (account) => {
-    account.isGettingFeedList = true;
+    isGettingFeedList.value = true;
     const result = await socketApiService.getFeedList(account.id);
     feedList.value = result.data.list;
     renewAfter.value = new Date(result.data.renewAfter * 1000).toLocaleString();
@@ -49,7 +50,7 @@ export const useFeedStore = defineStore("feed", () => {
       needCountOfCharger,
       needCountOfVc,
     };
-    account.isGettingFeedList = false;
+    isGettingFeedList.value = false;
   };
 
   const healChallengePower = async (account, chargerAmount, vcAmount) => {
@@ -114,6 +115,7 @@ export const useFeedStore = defineStore("feed", () => {
     challengePower,
     feedSnoopResult,
     feedChallengeResult,
+    isGettingFeedList,
     isHealingChallengePower,
     isFeedSnooping,
     isFeedChallenging,

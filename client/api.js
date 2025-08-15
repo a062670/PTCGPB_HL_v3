@@ -168,6 +168,16 @@ class SocketApiService {
     return this.request("stopApprove", { id: accountId });
   }
 
+  // 開始免費得卡
+  async startFreeFeed(accountId) {
+    return this.request("startFreeFeed", { id: accountId });
+  }
+
+  // 停止免費得卡
+  async stopFreeFeed(accountId) {
+    return this.request("stopFreeFeed", { id: accountId });
+  }
+
   // 取得好友列表
   async getFriendList(accountId) {
     return this.request("getFriendList", { id: accountId });

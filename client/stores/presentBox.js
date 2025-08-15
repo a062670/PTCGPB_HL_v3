@@ -12,6 +12,8 @@ export const usePresentBoxStore = defineStore("presentBox", () => {
   // 領取禮物結果
   const receivePresentBoxResult = ref({});
 
+  // 是否正在取得禮物盒
+  const isGettingPresentBoxList = ref(false);
   // 是否正在領取禮物
   const isReceivingPresentBox = ref(false);
 
@@ -24,13 +26,13 @@ export const usePresentBoxStore = defineStore("presentBox", () => {
 
   // 取得禮物盒
   const getPresentBoxList = async (account) => {
-    account.isGettingPresentBoxList = true;
+    isGettingPresentBoxList.value = true;
     const result = await socketApiService.getPresentBoxList(account.id);
     presentBoxList.value = result.data.presentsList.map((present) => ({
       ...present,
       expiredAt: new Date(present.expiredAt.seconds * 1000).toLocaleString(),
     }));
-    account.isGettingPresentBoxList = false;
+    isGettingPresentBoxList.value = false;
   };
 
   // 領取禮物
@@ -71,6 +73,7 @@ export const usePresentBoxStore = defineStore("presentBox", () => {
     // 狀態
     presentBoxList,
     receivePresentBoxResult,
+    isGettingPresentBoxList,
     isReceivingPresentBox,
 
     // 計算屬性

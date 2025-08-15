@@ -178,6 +178,24 @@ io.on("connection", (socket) => {
     });
   });
 
+  // 開始免費得卡
+  socket.on("startFreeFeed", async (data) => {
+    console.log("收到 startFreeFeed 請求");
+    const account = await actions.doStartFreeFeed(data.id);
+    await handleSocketEvent(socket, "startFreeFeed", () => {
+      return account;
+    });
+  });
+
+  // 停止免費得卡
+  socket.on("stopFreeFeed", async (data) => {
+    console.log("收到 stopFreeFeed 請求");
+    const account = await actions.doStopFreeFeed(data.id);
+    await handleSocketEvent(socket, "stopFreeFeed", () => {
+      return account;
+    });
+  });
+
   // 取得好友列表
   socket.on("getFriendList", async (data) => {
     console.log("收到 getFriendList 請求");

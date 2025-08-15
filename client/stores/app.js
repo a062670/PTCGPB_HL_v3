@@ -19,6 +19,9 @@ export const useAppStore = defineStore("app", () => {
   // 資料相關
   const showType = ref("");
 
+  const isLoggingIn = ref(false);
+  const isApproving = ref(false);
+  const isFreeFeeding = ref(false);
   const isGettingPlayerResources = ref(false);
   const isGettingFriendList = ref(false);
   const isDeletingFriends = ref(false);
@@ -75,11 +78,6 @@ export const useAppStore = defineStore("app", () => {
           packPowerChargers: [],
           challengePowerChargers: [],
         },
-        isLoggingIn: false,
-        isApproving: false,
-        isDeletingFriends: false,
-        isGettingFeedList: false,
-        isGettingPresentBoxList: false,
         lastUpdateAt: new Date().toLocaleString(),
       }));
 
@@ -96,17 +94,17 @@ export const useAppStore = defineStore("app", () => {
   };
 
   const login = async (account) => {
-    account.isLoggingIn = true;
+    isLoggingIn.value = true;
     const result = await socketApiService.login(account.id);
     updateAccount(account, result.data);
-    account.isLoggingIn = false;
+    isLoggingIn.value = false;
   };
 
   const logout = async (account) => {
-    account.isLoggingIn = true;
+    isLoggingIn.value = true;
     const result = await socketApiService.logout(account.id);
     updateAccount(account, result.data);
-    account.isLoggingIn = false;
+    isLoggingIn.value = false;
   };
 
   const getPlayerResources = async (account) => {
@@ -117,17 +115,31 @@ export const useAppStore = defineStore("app", () => {
   };
 
   const approve = async (account) => {
-    account.isApproving = true;
+    isApproving.value = true;
     const result = await socketApiService.approve(account.id);
     updateAccount(account, result.data);
-    account.isApproving = false;
+    isApproving.value = false;
   };
 
   const stopApprove = async (account) => {
-    account.isApproving = true;
+    isApproving.value = true;
     const result = await socketApiService.stopApprove(account.id);
     updateAccount(account, result.data);
-    account.isApproving = false;
+    isApproving.value = false;
+  };
+
+  const startFreeFeed = async (account) => {
+    isFreeFeeding.value = true;
+    const result = await socketApiService.startFreeFeed(account.id);
+    updateAccount(account, result.data);
+    isFreeFeeding.value = false;
+  };
+
+  const stopFreeFeed = async (account) => {
+    isFreeFeeding.value = true;
+    const result = await socketApiService.stopFreeFeed(account.id);
+    updateAccount(account, result.data);
+    isFreeFeeding.value = false;
   };
 
   const getFriendList = async (account) => {
@@ -143,10 +155,10 @@ export const useAppStore = defineStore("app", () => {
   };
 
   const deleteAllFriends = async (account) => {
-    account.isDeletingFriends = true;
+    isDeletingFriends.value = true;
     const result = await socketApiService.deleteAllFriends(account.id);
     updateAccount(account, result.data);
-    account.isDeletingFriends = false;
+    isDeletingFriends.value = false;
   };
 
   const selectAccount = (account) => {
@@ -176,6 +188,9 @@ export const useAppStore = defineStore("app", () => {
 
     showType,
 
+    isLoggingIn,
+    isApproving,
+    isFreeFeeding,
     isGettingPlayerResources,
     isGettingFriendList,
     isDeletingFriends,
@@ -192,6 +207,8 @@ export const useAppStore = defineStore("app", () => {
     getPlayerResources,
     approve,
     stopApprove,
+    startFreeFeed,
+    stopFreeFeed,
     getFriendList,
     deleteFriend,
     deleteAllFriends,

@@ -23,142 +23,148 @@
       </div>
       <div>{{ account.lastUpdateAt }}</div>
       <div class="d-flex ga-2 flex-wrap">
-        <v-btn
-          v-if="account.isLogin"
-          color="info"
-          :loading="appStore.isLoggingIn"
-          @click="appStore.logout(account)"
-        >
-          登出
-        </v-btn>
-        <v-btn
-          v-if="!account.isLogin"
-          color="gray"
-          :loading="appStore.isLoggingIn"
-          @click="appStore.login(account)"
-        >
-          登入
-        </v-btn>
-        <v-btn
-          v-if="account.isApprove"
-          color="primary"
-          :loading="appStore.isApproving"
-          @click="appStore.stopApprove(account)"
-        >
-          停止加好友
-        </v-btn>
-        <v-btn
-          v-if="!account.isApprove && account.isLogin"
-          color="gray"
-          :loading="appStore.isApproving"
-          @click="appStore.approve(account)"
-        >
-          開始加好友
-        </v-btn>
-        <v-btn
-          v-if="account.isFreeFeed"
-          color="primary"
-          :loading="appStore.isFreeFeeding"
-          @click="appStore.stopFreeFeed(account)"
-        >
-          停止免費得卡
-        </v-btn>
-        <v-btn
-          v-if="!account.isFreeFeed && account.isLogin"
-          color="gray"
-          :loading="appStore.isFreeFeeding"
-          @click="appStore.startFreeFeed(account)"
-        >
-          開始免費得卡
-        </v-btn>
-        <v-btn
-          v-if="account.isLogin"
-          color="info"
-          :loading="appStore.isGettingFriendList"
-          @click="
+        <div class="d-flex ga-2 flex-wrap">
+          <v-btn
+            v-if="account.isLogin"
+            color="info"
+            :loading="appStore.isLoggingIn"
+            @click="appStore.logout(account)"
+          >
+            登出
+          </v-btn>
+          <v-btn
+            v-if="!account.isLogin"
+            color="gray"
+            :loading="appStore.isLoggingIn"
+            @click="appStore.login(account)"
+          >
+            登入
+          </v-btn>
+          <v-btn
+            v-if="account.isApprove"
+            color="primary"
+            :loading="appStore.isApproving"
+            @click="appStore.stopApprove(account)"
+          >
+            停止加好友
+          </v-btn>
+          <v-btn
+            v-if="!account.isApprove && account.isLogin"
+            color="gray"
+            :loading="appStore.isApproving"
+            @click="appStore.approve(account)"
+          >
+            開始加好友
+          </v-btn>
+        </div>
+        <div class="d-flex ga-2 flex-wrap">
+          <v-btn
+            v-if="account.isFreeFeed"
+            color="primary"
+            :loading="appStore.isFreeFeeding"
+            @click="appStore.stopFreeFeed(account)"
+          >
+            停止免費得卡
+          </v-btn>
+          <v-btn
+            v-if="!account.isFreeFeed && account.isLogin"
+            color="gray"
+            :loading="appStore.isFreeFeeding"
+            @click="appStore.startFreeFeed(account)"
+          >
+            開始免費得卡
+          </v-btn>
+        </div>
+        <div class="d-flex ga-2 flex-wrap">
+          <v-btn
+            v-if="account.isLogin"
+            color="info"
+            :loading="appStore.isGettingFriendList"
+            @click="
             appStore.showType = 'friendList';
             appStore.selectAccount(account);
             appStore.getFriendList(account)
           "
-        >
-          好友列表
-        </v-btn>
-        <v-btn
-          v-if="account.isLogin"
-          color="warning"
-          :loading="appStore.isDeletingFriends"
-          @click="appStore.deleteAllFriends(account)"
-        >
-          刪除好友
-        </v-btn>
-        <v-btn
-          v-if="account.isLogin"
-          color="info"
-          :loading="feedStore.isGettingFeedList"
-          @click="
+          >
+            好友列表
+          </v-btn>
+          <v-btn
+            v-if="account.isLogin"
+            color="warning"
+            :loading="appStore.isDeletingFriends"
+            @click="appStore.deleteAllFriends(account)"
+          >
+            刪除好友
+          </v-btn>
+          <v-btn
+            v-if="account.isLogin"
+            color="info"
+            :loading="feedStore.isGettingFeedList"
+            @click="
             appStore.showType = 'feedList';
             feedStore.clearAll();
             appStore.selectAccount(account);
             feedStore.getFeedList(account);
           "
-        >
-          得卡列表
-        </v-btn>
-        <v-btn
-          v-if="account.isLogin"
-          color="info"
-          :loading="presentBoxStore.isGettingPresentBoxList"
-          @click="
+          >
+            得卡列表
+          </v-btn>
+          <v-btn
+            v-if="account.isLogin"
+            color="info"
+            :loading="presentBoxStore.isGettingPresentBoxList"
+            @click="
             appStore.showType = 'presentBoxList';
             presentBoxStore.clearAll();
             appStore.selectAccount(account);
             presentBoxStore.getPresentBoxList(account);
           "
-        >
-          禮物盒
-        </v-btn>
-        <v-btn
-          v-if="account.isLogin"
-          color="info"
-          :loading="eventBattleStore.isGettingInfo"
-          @click="
+          >
+            禮物盒
+          </v-btn>
+          <v-btn
+            v-if="account.isLogin"
+            color="info"
+            :loading="eventBattleStore.isGettingInfo"
+            @click="
             appStore.showType = 'eventBattle'; 
             eventBattleStore.clearAll(); 
             appStore.selectAccount(account);
             eventBattleStore.getInfo(account);
           "
-        >
-          活動戰鬥
-        </v-btn>
-        <v-btn
-          v-if="account.isLogin"
-          color="info"
-          :loading="packStore.isGettingPackPower"
-          @click="
+          >
+            活動戰鬥
+          </v-btn>
+          <v-btn
+            v-if="account.isLogin"
+            color="info"
+            :loading="packStore.isGettingPackPower"
+            @click="
             appStore.showType = 'pack';
             packStore.clearAll();
             appStore.selectAccount(account);
             packStore.getPackPower(account);
           "
-        >
-          開包
-        </v-btn>
-        <v-btn
-          v-if="account.isLogin"
-          color="info"
-          :loading="itemShopStore.isRunning"
-          @click="itemShopStore.runPurchase(account)"
-        >
-          每日禮物
-        </v-btn>
-        <v-btn
-          v-if="account.isLogin"
-          color="info"
-          :loading="appStore.isGettingPlayerResources"
-          @click="appStore.getPlayerResources(account)"
-        >
-          更新資源
-        </v-btn>
+          >
+            開包
+          </v-btn>
+          <v-btn
+            v-if="account.isLogin"
+            color="info"
+            :loading="itemShopStore.isRunning"
+            @click="itemShopStore.runPurchase(account)"
+          >
+            每日禮物
+          </v-btn>
+          <v-btn
+            v-if="account.isLogin"
+            color="info"
+            :loading="appStore.isGettingPlayerResources"
+            @click="appStore.getPlayerResources(account)"
+          >
+            更新資源
+          </v-btn>
+        </div>
       </div>
       <div class="mt-2">
         <div>圖鑑：{{ account.playerResources.cardStocks.length || '' }}</div>

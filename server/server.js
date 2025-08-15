@@ -374,7 +374,8 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(mainConfig.webUiPort, () => {
-  console.log(`Socket.io 服務器運行在端口 ${mainConfig.webUiPort}`);
-  open(`http://localhost:${mainConfig.webUiPort}/`);
+const webUiPort = mainConfig.webUiPort || 9487;
+server.listen(webUiPort, () => {
+  console.log(`Socket.io 服務器運行在端口 ${webUiPort}`);
+  open(`http://localhost:${webUiPort}/`);
 });

@@ -374,7 +374,7 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(9487, () => {
-  console.log("Socket.io 服務器運行在端口 9487");
-  open("http://localhost:9487/");
+server.listen(mainConfig.webUiPort, () => {
+  console.log(`Socket.io 服務器運行在端口 ${mainConfig.webUiPort}`);
+  open(`http://localhost:${mainConfig.webUiPort}/`);
 });

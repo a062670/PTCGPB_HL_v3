@@ -18,6 +18,7 @@ const ItemShopClient = require("../steps/ItemShopClient.js");
 const PlayerResourcesClient = require("../steps/PlayerResourcesClient.js");
 
 const mainConfig = require("../config/main.json");
+const staticConfig = require("../config/static.json");
 const eventBattleConfig = require("../config/eventBattle.json");
 const packConfig = require("../config/pack.json");
 
@@ -341,7 +342,8 @@ async function login(account) {
   // 遊戲登入
   const authorizeV1Response = await SystemClient.AuthorizeV1(
     account.headers,
-    idToken
+    idToken,
+    staticConfig.deviceInfo
   );
   account.headers["x-takasho-session-token"] =
     authorizeV1Response.data.sessionToken;

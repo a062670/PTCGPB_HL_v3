@@ -294,6 +294,56 @@ io.on("connection", (socket) => {
     });
   });
 
+  // 取得群組任務狀態
+  socket.on("getMissionGroupRewardStepStates", async (data) => {
+    console.log("收到 getMissionGroupRewardStepStates 請求");
+    const missionGroupRewardStepStates =
+      await actions.doGetMissionGroupRewardStepStates(
+        data.id,
+        data.rewardStepIds
+      );
+    await handleSocketEvent(socket, "getMissionGroupRewardStepStates", () => {
+      return missionGroupRewardStepStates;
+    });
+  });
+
+  // 完成群組任務
+  socket.on("completeMissionGroupRewardStep", async (data) => {
+    console.log("收到 completeMissionGroupRewardStep 請求");
+    const completeMissionGroupRewardStep =
+      await actions.doCompleteMissionGroupRewardStep(
+        data.id,
+        data.rewardStepIds
+      );
+    await handleSocketEvent(socket, "completeMissionGroupRewardStep", () => {
+      return {};
+    });
+  });
+
+  // 取得任務狀態
+  socket.on("getMissionIsCompleted", async (data) => {
+    console.log("收到 getMissionIsCompleted 請求");
+    const missionIsCompleted = await actions.doGetMissionIsCompleted(
+      data.id,
+      data.missionIds
+    );
+    await handleSocketEvent(socket, "getMissionIsCompleted", () => {
+      return missionIsCompleted;
+    });
+  });
+
+  // 完成任務
+  socket.on("completeMission", async (data) => {
+    console.log("收到 completeMission 請求");
+    const completeMission = await actions.doCompleteMission(
+      data.id,
+      data.missionIds
+    );
+    await handleSocketEvent(socket, "completeMission", () => {
+      return {};
+    });
+  });
+
   // 取得牌組列表
   socket.on("getDeckList", async (data) => {
     console.log("收到 getDeckList 請求");

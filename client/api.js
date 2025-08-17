@@ -237,6 +237,38 @@ class SocketApiService {
     return this.request("receivePresentBox", { id: accountId, presentBoxIds });
   }
 
+  // 取得群組任務狀態
+  async getMissionGroupRewardStepStates(accountId, rewardStepIds) {
+    return this.request("getMissionGroupRewardStepStates", {
+      id: accountId,
+      rewardStepIds,
+    });
+  }
+
+  // 完成群組任務
+  async completeMissionGroupRewardStep(accountId, rewardStepIds) {
+    return this.request("completeMissionGroupRewardStep", {
+      id: accountId,
+      rewardStepIds,
+    });
+  }
+
+  // 取得任務狀態
+  async getMissionIsCompleted(accountId, missionIds) {
+    return this.request("getMissionIsCompleted", {
+      id: accountId,
+      missionIds,
+    });
+  }
+
+  // 完成任務
+  async completeMission(accountId, missionIds) {
+    return this.request("completeMission", {
+      id: accountId,
+      missionIds,
+    });
+  }
+
   // 取得牌組列表
   async getDeckList(accountId) {
     return this.request("getDeckList", { id: accountId });

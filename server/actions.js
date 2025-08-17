@@ -16,6 +16,7 @@ const SoloBattleClient = require("../steps/SoloBattleClient.js");
 const PackClient = require("../steps/PackClient.js");
 const ItemShopClient = require("../steps/ItemShopClient.js");
 const PlayerResourcesClient = require("../steps/PlayerResourcesClient.js");
+const MissionClient = require("../steps/MissionClient.js");
 
 const mainConfig = require("../config/main.json");
 const staticConfig = require("../config/static.json");
@@ -228,6 +229,47 @@ exports.doReceivePresentBox = async (accountId, presentBoxIds) => {
     throw new Error("account not found");
   }
   return await receivePresentBox(account, presentBoxIds);
+};
+
+/** 取得群組任務狀態 */
+exports.doGetMissionGroupRewardStepStates = async (
+  accountId,
+  rewardStepIds
+) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  return await getMissionGroupRewardStepStates(account, rewardStepIds);
+};
+
+/** 完成群組任務 */
+exports.doCompleteMissionGroupRewardStep = async (accountId, rewardStepIds) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  await completeMissionGroupRewardStep(account, rewardStepIds);
+  return;
+};
+
+/** 取得任務狀態 */
+exports.doGetMissionIsCompleted = async (accountId, missionIds) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  return await getMissionIsCompleted(account, missionIds);
+};
+
+/** 完成任務 */
+exports.doCompleteMission = async (accountId, missionIds) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  await completeMission(account, missionIds);
+  return;
 };
 
 /** 取得牌組列表 */
@@ -669,6 +711,52 @@ async function receivePresentBox(account, presentBoxIds) {
     });
   }
   return receivePresentBoxResponse.data;
+}
+
+async function getMissionGroupRewardStepStates(account, rewardStepIds) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const missionGroupRewardStepStates =
+    await MissionClient.GetGroupRewardStepStatesV1(
+      account.headers,
+      rewardStepIds
+    );
+  return missionGroupRewardStepStates.data;
+}
+
+async function completeMissionGroupRewardStep(account, rewardStepIds) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const completeMissionGroupRewardStep =
+    await MissionClient.CompleteGroupRewardStepV1(
+      account.headers,
+      rewardStepIds
+    );
+  return;
+}
+
+async function getMissionIsCompleted(account, missionIds) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const missionIsCompleted = await MissionClient.IsCompletedV1(
+    account.headers,
+    missionIds
+  );
+  return missionIsCompleted.data;
+}
+
+async function completeMission(account, missionIds) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const completeMission = await MissionClient.CompleteV2(
+    account.headers,
+    missionIds
+  );
+  return;
 }
 
 async function getDeckList(account) {

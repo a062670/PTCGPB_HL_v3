@@ -5,6 +5,7 @@ import { useFeedStore } from "./stores/feed.js";
 import { useEventBattleStore } from "./stores/eventBattle.js";
 import { usePackStore } from "./stores/pack.js";
 import { useItemShopStore } from "./stores/itemShop.js";
+import { useMissionStore } from "./stores/mission.js";
 
 import { registerCardListComponent } from "./components/cardList.js";
 
@@ -58,6 +59,7 @@ async function loadTemplate() {
       const eventBattleStore = useEventBattleStore();
       const packStore = usePackStore();
       const itemShopStore = useItemShopStore();
+      const missionStore = useMissionStore();
 
       const theme = useTheme();
 
@@ -83,6 +85,7 @@ async function loadTemplate() {
         eventBattleStore,
         packStore,
         itemShopStore,
+        missionStore,
 
         toggleTheme,
       };

@@ -159,6 +159,14 @@
           <v-btn
             v-if="account.isLogin"
             color="info"
+            :loading="missionStore.isRunning"
+            @click="missionStore.runDailyMission(account)"
+          >
+            每日任務
+          </v-btn>
+          <v-btn
+            v-if="account.isLogin"
+            color="info"
             :loading="appStore.isGettingPlayerResources"
             @click="appStore.getPlayerResources(account)"
           >

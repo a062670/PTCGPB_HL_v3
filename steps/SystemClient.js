@@ -10,20 +10,18 @@ const LanguageProto = require("../generated/takasho/schema/lettuce_server/resour
 const PlayerSettingsInfoProto = require("../generated/takasho/schema/lettuce_server/resource/player_settings/info_pb.js");
 
 /** 取得 sessionToken */
-const AuthorizeV1 = async (headers, idToken, deviceInfoStatic = {}) => {
+const AuthorizeV1 = async (headers, idToken, deviceAccount) => {
   // 建立 Request instance
   const request = new SystemAuthorizeProto.SystemAuthorizeV1.Types.Request();
   request.setIdToken(idToken);
   request.setDeviceAccount(
-    deviceInfoStatic.deviceAccount || createRandomHexString(32).toUpperCase()
+    deviceAccount || createRandomHexString(32).toUpperCase()
   );
 
   // 建立 DeviceInfo instance
   const deviceInfo = new DeviceInfoProto.DeviceInfo();
   deviceInfo.setPlatform(PlatformTypeProto.PlatformType.PLATFORM_TYPE_GOOGLE);
-  deviceInfo.setIdentifier(
-    deviceInfoStatic.identifier || createRandomHexString(64)
-  );
+  deviceInfo.setIdentifier(createRandomHexString(64));
   request.setDeviceInfo(deviceInfo);
 
   // 序列化為 byte array（Uint8Array）

@@ -5,6 +5,9 @@
       "password": ""
     }
   ],
+  "deviceInfo": {
+    "deviceAccount": ""
+  },
   "reLoginWaitTime": 10,
   "testAccount": {
     "id": "",

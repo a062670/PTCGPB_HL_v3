@@ -33,9 +33,5 @@
     "buildVersion": "ce01b280a393def4847d37b1c7776593fa36d56c",
     "os": "Android",
     "platform": "Google"
-  },
-  "deviceInfo": {
-    "deviceAccount": "H0ZWCYWXDB9LIDKLYE9N8BGSY8S1K7FH",
-    "identifier": "ee4d49abc55f2e7092d7d9b63bbbedc4631ea7e66d2a6b600ab80ca0f164ab86"
   }
 }

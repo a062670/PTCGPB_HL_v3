@@ -19,7 +19,6 @@ const PlayerResourcesClient = require("../steps/PlayerResourcesClient.js");
 const MissionClient = require("../steps/MissionClient.js");
 
 const mainConfig = require("../config/main.json");
-const staticConfig = require("../config/static.json");
 const eventBattleConfig = require("../config/eventBattle.json");
 const packConfig = require("../config/pack.json");
 
@@ -385,7 +384,7 @@ async function login(account) {
   const authorizeV1Response = await SystemClient.AuthorizeV1(
     account.headers,
     idToken,
-    staticConfig.deviceInfo
+    mainConfig.deviceInfo.deviceAccount
   );
   account.headers["x-takasho-session-token"] =
     authorizeV1Response.data.sessionToken;

@@ -384,7 +384,7 @@ async function login(account) {
   const authorizeV1Response = await SystemClient.AuthorizeV1(
     account.headers,
     idToken,
-    mainConfig.deviceInfo.deviceAccount
+    mainConfig.deviceInfo?.deviceAccount || ""
   );
   account.headers["x-takasho-session-token"] =
     authorizeV1Response.data.sessionToken;

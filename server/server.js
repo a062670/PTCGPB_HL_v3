@@ -123,6 +123,14 @@ io.on("connection", (socket) => {
     });
   });
 
+  // 檢查版本
+  socket.on("checkVersion", async (data) => {
+    await actions.doCheckVersion();
+    await handleSocketEvent(socket, "checkVersion", () => {
+      return {};
+    });
+  });
+
   // 獲取帳號列表
   socket.on("getAccounts", async (data) => {
     console.log("收到 getAccounts 請求");

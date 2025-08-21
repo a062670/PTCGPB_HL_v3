@@ -4,7 +4,15 @@
     <v-app-bar-nav-icon @click="appStore.toggleDrawer"></v-app-bar-nav-icon>
     <v-toolbar-title>
       {{ appStore.title }}
-      <small> ({{ appStore.version }}) </small>
+      <v-chip variant="flat" class="ml-1"> {{ appStore.version }} </v-chip>
+      <v-chip
+        v-if="appStore.lastVersion && appStore.lastVersion !== appStore.version"
+        color="red"
+        variant="flat"
+        class="ml-2"
+      >
+        new: {{ appStore.lastVersion }}
+      </v-chip>
     </v-toolbar-title>
     <v-spacer></v-spacer>
     <v-btn icon @click="toggleTheme">

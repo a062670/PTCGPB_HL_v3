@@ -21,6 +21,7 @@ const MissionClient = require("../steps/MissionClient.js");
 const mainConfig = require("../config/main.json");
 const eventBattleConfig = require("../config/eventBattle.json");
 const packConfig = require("../config/pack.json");
+const versionConfig = require("../config/version.json");
 
 Grpc.setMaxRetries(0);
 
@@ -64,6 +65,10 @@ exports.getAccounts = () => {
     exports.reloadConfig();
   }
   return (accounts || []).map(filterAccount);
+};
+
+exports.doCheckVersion = async () => {
+  await checkVersion();
 };
 
 exports.doLogin = async (accountId) => {
@@ -365,6 +370,17 @@ exports.doPurchaseItemShop = async (
 function emitToSocket(event, data) {
   if (socketInstance) {
     socketInstance.emit(event, data);
+  }
+}
+
+async function checkVersion() {
+  const version = await fetch(
+    "https://raw.githubusercontent.com/a062670/PTCGPB_HL_v3/refs/heads/hl/config/version.json"
+  );
+  const versionData = await version.json();
+  console.log("versionData", versionData);
+  if (versionData.version !== versionConfig.version) {
+    emitToSocket("updateLastVersion", versionData.version);
   }
 }
 
@@ -1042,4 +1058,14 @@ function schedule() {
       }
     })();
   }
+
+  // 每隔一小時檢查版本
+  (async () => {
+    while (1) {
+      try {
+        await checkVersion();
+      } catch {}
+      await sleep(1000 * 60 * 10);
+    }
+  })();
 }

@@ -52,6 +52,11 @@ class SocketApiService {
       console.log("收到帳號更新通知:", account);
       this.emitEvent("updateAccount", account);
     });
+    // 監聽版本更新通知
+    this.socket.on("updateLastVersion", (version) => {
+      console.log("收到版本更新通知:", version);
+      this.emitEvent("updateLastVersion", version);
+    });
   }
 
   // 監聽通知事件
@@ -136,6 +141,11 @@ class SocketApiService {
   // 取得版本號
   async getVersion() {
     return this.request("getVersion", null);
+  }
+
+  // 檢查版本
+  async checkVersion() {
+    return this.request("checkVersion", null);
   }
 
   // 帳號相關 API

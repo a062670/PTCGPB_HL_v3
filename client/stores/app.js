@@ -11,6 +11,7 @@ export const useAppStore = defineStore("app", () => {
   const drawer = ref(true);
   const loading = ref(false);
   const version = ref("");
+  const lastVersion = ref("");
 
   // 帳號相關狀態
   const accounts = ref([]);
@@ -50,6 +51,11 @@ export const useAppStore = defineStore("app", () => {
         updateAccount(accounts.value[accountIndex], updatedAccount);
       }
     });
+    // 監聽版本更新通知
+    socketApiService.on("updateLastVersion", (version) => {
+      console.log("收到版本更新通知:", version);
+      lastVersion.value = version;
+    });
   };
 
   // 移除 hideSnackbar，toast 會自動關閉
@@ -83,6 +89,9 @@ export const useAppStore = defineStore("app", () => {
 
       // 設置通知監聽器
       setupNotificationListeners();
+
+      // 檢查新版本
+      await socketApiService.checkVersion();
 
       toastService.success("帳號列表載入成功");
     } catch (error) {
@@ -183,6 +192,7 @@ export const useAppStore = defineStore("app", () => {
     drawer,
     loading,
     version,
+    lastVersion,
     accounts,
     selectedAccountId,
 

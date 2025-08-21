@@ -33,7 +33,24 @@ export const useItemShopStore = defineStore("itemShop", () => {
       0,
       1
     );
-    toastService.success("每日禮物領取成功！");
+
+    const responseAgain = await socketApiService.getItemShopPurchaseSummaries(
+      account.id,
+      "SH_CG_SH_001_001"
+    );
+    const findAgain = responseAgain.data.purchaseSummariesList.find(
+      (item) => item.productId === "SH_CG_SH_001_001"
+    );
+    if (!findAgain) {
+      toastService.error("確認每日禮物查詢失敗！");
+      isRunning.value = false;
+      return;
+    }
+    if (findAgain.purchaseAmount > 0) {
+      toastService.success("確認每日禮物已領取成功！");
+    } else {
+      toastService.error("每日禮物領取失敗！");
+    }
     isRunning.value = false;
   };
 

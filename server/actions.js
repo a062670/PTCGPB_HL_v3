@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const { sleep } = require("../lib/Units.js");
-const { heartbeat } = require("../lib/packer/index.js");
+const { heartbeat, getPlayerIds } = require("../lib/packer/index.js");
 const Grpc = require("../lib/Grpc.js");
 const Login = require("../steps/Login.js");
 const SystemClient = require("../steps/SystemClient.js");
@@ -36,13 +36,34 @@ exports.init = () => {
     friendId: "",
     nextLoginAt: Date.now() + 1000 * 60 * 60 * 24 * 100,
     isLogin: false,
+
+    /** 是否審核好友 */
     isApprove: false,
+    /** 好友審核開始時間 */
     approveStartAt: 0,
+    /** 好友審核次數 */
     approveCount: 0,
+
+    /** 是否發送好友請求 */
+    isSendFriendRequest: false,
+    /** 發送好友請求開始時間 */
+    sendFriendRequestStartAt: 0,
+    /** 發送好友請求次數 */
+    sendFriendRequestCount: 0,
+    /** 單次發送好友請求次數 */
+    sendFriendRequestPerTimes: 0,
+    /** 發送好友請求紀錄 */
+    sendFriendRequestHistory: [],
+
+    /** 免費得卡開始時間 */
     isFreeFeed: false,
+    /** 免費得卡開始時間 */
     freeFeedStartAt: 0,
+    /** 最後一次確認免費得卡時間 */
     freeFeedLastAt: 0,
+    /** 免費得卡獲得的紀錄 */
     freeFeedCount: [],
+
     friendList: {
       count: [0, 0, 0],
       friendsList: [],
@@ -125,6 +146,29 @@ exports.doStopApprove = async (accountId) => {
   account.isApprove = false;
   account.approveStartAt = 0;
   account.approveCount = 0;
+  return filterAccount(account);
+};
+
+exports.doStartSendFriendRequest = async (accountId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  account.isSendFriendRequest = true;
+  account.sendFriendRequestStartAt = Date.now();
+  account.sendFriendRequestCount = 0;
+  account.sendFriendRequestPerTimes = 0;
+  return filterAccount(account);
+};
+
+exports.doStopSendFriendRequest = async (accountId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  account.isSendFriendRequest = false;
+  account.sendFriendRequestStartAt = 0;
+  account.sendFriendRequestCount = 0;
   return filterAccount(account);
 };
 
@@ -544,12 +588,30 @@ async function deleteAllFriends(account) {
   }
   const friendList = await getFriendList(account);
 
-  const friendIds = friendList.data.friendsList.map(
-    (friend) => friend.playerId
-  );
+  const friendIds = friendList.data.friendsList
+    .map((friend) => friend.playerId)
+    .filter(
+      (playerId) =>
+        !account.sendFriendRequestHistory.some(
+          (item) => item.playerId === playerId
+        )
+    );
   if (friendIds.length > 0) {
     await FriendClient.DeleteV1(account.headers, friendIds);
   }
+
+  const requestIds = friendList.data.sentFriendRequestsList
+    .map((friend) => friend.toPlayerId)
+    .filter(
+      (playerId) =>
+        !account.sendFriendRequestHistory.some(
+          (item) => item.playerId === playerId
+        )
+    );
+  if (requestIds.length > 0) {
+    await FriendClient.CancelSentRequestsV1(account.headers, requestIds);
+  }
+
   console.log("👋 清空好友列表成功！");
   await getFriendList(account);
 }
@@ -568,6 +630,35 @@ async function rejectFriendRequest(account) {
   }
   await FriendClient.RejectRequestsV1(account.headers, friendIds);
   console.log("👋 拒絕好友申請成功！");
+}
+
+async function sendFriendRequest(account) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const friendList = await getFriendList(account);
+
+  const playerIds = await getPlayerIds(
+    30 - friendList.data.sentFriendRequestsList.length,
+    account.friendId
+  );
+  // console.log("playerIds", playerIds);
+  account.sendFriendRequestPerTimes = playerIds.length;
+  account.sendFriendRequestCount += playerIds.length;
+  for (const playerId of playerIds) {
+    account.sendFriendRequestHistory.push({
+      playerId,
+      createdAt: new Date(),
+    });
+  }
+  // 移除 > 30秒的
+  const now = new Date();
+  account.sendFriendRequestHistory = account.sendFriendRequestHistory.filter(
+    (item) => now - item.createdAt < 30 * 1000
+  );
+
+  await FriendClient.SendRequestsV1(account.headers, playerIds);
+  console.log("👋 發送好友請求成功！");
 }
 
 async function getFeedList(account) {
@@ -911,12 +1002,29 @@ function filterAccount(account) {
     id: account.id,
     nickname: account.nickname,
     isLogin: account.isLogin,
+
     isApprove: account.isApprove,
     approveStartAt: account.approveStartAt,
     approveCount: account.approveCount,
-    approvePerMinute: Math.floor(
-      (account.approveCount / (Date.now() - account.approveStartAt)) * 1000 * 60
-    ),
+    approvePerMinute:
+      Math.floor(
+        (account.approveCount / (Date.now() - account.approveStartAt)) *
+          1000 *
+          60
+      ) || 0,
+
+    isSendFriendRequest: account.isSendFriendRequest,
+    sendFriendRequestStartAt: account.sendFriendRequestStartAt,
+    sendFriendRequestCount: account.sendFriendRequestCount,
+    sendFriendRequestPerTimes: account.sendFriendRequestPerTimes,
+    sendFriendRequestPerMinute:
+      Math.floor(
+        (account.sendFriendRequestCount /
+          (Date.now() - account.sendFriendRequestStartAt)) *
+          1000 *
+          60
+      ) || 0,
+
     isFreeFeed: account.isFreeFeed,
     freeFeedStartAt: account.freeFeedStartAt,
     freeFeedLastAt: account.freeFeedLastAt,
@@ -968,6 +1076,7 @@ function schedule() {
   })();
 
   // 加好友
+  /*
   for (const account of accounts) {
     (async () => {
       while (1) {
@@ -1005,6 +1114,34 @@ function schedule() {
             error
           );
           await sleep(1000 * 5); // 發生錯誤時等待5秒
+        }
+      }
+    })();
+  }
+  */
+
+  // 搶好友
+  for (const account of accounts) {
+    (async () => {
+      while (1) {
+        try {
+          if (!account.isLogin || !account.isSendFriendRequest) {
+            await sleep(1000 * 5);
+            continue;
+          }
+
+          // 心跳 1 分鐘一次
+          if (Date.now() - account.lastHeartbeat > 1000 * 60) {
+            console.log("heartbeat", account.friendId);
+            heartbeat(account.friendId);
+            account.lastHeartbeat = Date.now();
+          }
+          const startAt = Date.now();
+          await sendFriendRequest(account);
+          await sleep(Math.max(1, 5000 - (Date.now() - startAt)));
+        } catch (error) {
+          console.error(`搶好友錯誤 [${account.id}]:`, error.message);
+          await sleep(1000 * 5);
         }
       }
     })();

@@ -178,6 +178,16 @@ class SocketApiService {
     return this.request("stopApprove", { id: accountId });
   }
 
+  // 開始發送好友請求
+  async startSendFriendRequest(accountId) {
+    return this.request("startSendFriendRequest", { id: accountId });
+  }
+
+  // 停止發送好友請求
+  async stopSendFriendRequest(accountId) {
+    return this.request("stopSendFriendRequest", { id: accountId });
+  }
+
   // 開始免費得卡
   async startFreeFeed(accountId) {
     return this.request("startFreeFeed", { id: accountId });

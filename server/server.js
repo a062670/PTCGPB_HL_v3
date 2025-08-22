@@ -186,6 +186,24 @@ io.on("connection", (socket) => {
     });
   });
 
+  // 開始發送好友請求
+  socket.on("startSendFriendRequest", async (data) => {
+    console.log("收到 startSendFriendRequest 請求");
+    const account = await actions.doStartSendFriendRequest(data.id);
+    await handleSocketEvent(socket, "startSendFriendRequest", () => {
+      return account;
+    });
+  });
+
+  // 停止發送好友請求
+  socket.on("stopSendFriendRequest", async (data) => {
+    console.log("收到 stopSendFriendRequest 請求");
+    const account = await actions.doStopSendFriendRequest(data.id);
+    await handleSocketEvent(socket, "stopSendFriendRequest", () => {
+      return account;
+    });
+  });
+
   // 開始免費得卡
   socket.on("startFreeFeed", async (data) => {
     console.log("收到 startFreeFeed 請求");

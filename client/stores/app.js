@@ -22,6 +22,7 @@ export const useAppStore = defineStore("app", () => {
 
   const isLoggingIn = ref(false);
   const isApproving = ref(false);
+  const isSendFriendRequest = ref(false);
   const isFreeFeeding = ref(false);
   const isGettingPlayerResources = ref(false);
   const isGettingFriendList = ref(false);
@@ -137,6 +138,20 @@ export const useAppStore = defineStore("app", () => {
     isApproving.value = false;
   };
 
+  const startSendFriendRequest = async (account) => {
+    isSendFriendRequest.value = true;
+    const result = await socketApiService.startSendFriendRequest(account.id);
+    updateAccount(account, result.data);
+    isSendFriendRequest.value = false;
+  };
+
+  const stopSendFriendRequest = async (account) => {
+    isSendFriendRequest.value = true;
+    const result = await socketApiService.stopSendFriendRequest(account.id);
+    updateAccount(account, result.data);
+    isSendFriendRequest.value = false;
+  };
+
   const startFreeFeed = async (account) => {
     isFreeFeeding.value = true;
     const result = await socketApiService.startFreeFeed(account.id);
@@ -200,6 +215,7 @@ export const useAppStore = defineStore("app", () => {
 
     isLoggingIn,
     isApproving,
+    isSendFriendRequest,
     isFreeFeeding,
     isGettingPlayerResources,
     isGettingFriendList,
@@ -217,6 +233,8 @@ export const useAppStore = defineStore("app", () => {
     getPlayerResources,
     approve,
     stopApprove,
+    startSendFriendRequest,
+    stopSendFriendRequest,
     startFreeFeed,
     stopFreeFeed,
     getFriendList,

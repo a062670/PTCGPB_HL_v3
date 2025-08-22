@@ -639,7 +639,7 @@ async function sendFriendRequest(account) {
   const friendList = await getFriendList(account);
 
   const playerIds = await getPlayerIds(
-    30 - friendList.data.sentFriendRequestsList.length,
+    20 - friendList.data.sentFriendRequestsList.length,
     account.friendId
   );
   // console.log("playerIds", playerIds);

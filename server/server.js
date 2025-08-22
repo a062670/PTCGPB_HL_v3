@@ -249,6 +249,24 @@ io.on("connection", (socket) => {
     });
   });
 
+  // 取消所有好友申請
+  socket.on("cancelAllFriendRequest", async (data) => {
+    console.log("收到 cancelAllFriendRequest 請求");
+    const account = await actions.doCancelAllFriendRequest(data.id);
+    await handleSocketEvent(socket, "cancelAllFriendRequest", () => {
+      return account;
+    });
+  });
+
+  // 拒絕所有好友申請
+  socket.on("rejectAllFriendRequest", async (data) => {
+    console.log("收到 rejectAllFriendRequest 請求");
+    const account = await actions.doRejectAllFriendRequest(data.id);
+    await handleSocketEvent(socket, "rejectAllFriendRequest", () => {
+      return account;
+    });
+  });
+
   // 取得得卡列表
   socket.on("getFeedList", async (data) => {
     console.log("收到 getFeedList 請求");

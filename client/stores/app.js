@@ -27,6 +27,8 @@ export const useAppStore = defineStore("app", () => {
   const isGettingPlayerResources = ref(false);
   const isGettingFriendList = ref(false);
   const isDeletingFriends = ref(false);
+  const isCancellingFriendRequest = ref(false);
+  const isRejectingFriendRequest = ref(false);
 
   // 計算屬性
   const selectedAccount = computed(() => {
@@ -185,6 +187,20 @@ export const useAppStore = defineStore("app", () => {
     isDeletingFriends.value = false;
   };
 
+  const cancelAllFriendRequest = async (account) => {
+    isCancellingFriendRequest.value = true;
+    const result = await socketApiService.cancelAllFriendRequest(account.id);
+    updateAccount(account, result.data);
+    isCancellingFriendRequest.value = false;
+  };
+
+  const rejectAllFriendRequest = async (account) => {
+    isRejectingFriendRequest.value = true;
+    const result = await socketApiService.rejectAllFriendRequest(account.id);
+    updateAccount(account, result.data);
+    isRejectingFriendRequest.value = false;
+  };
+
   const selectAccount = (account) => {
     selectedAccountId.value = account.id;
   };
@@ -220,6 +236,8 @@ export const useAppStore = defineStore("app", () => {
     isGettingPlayerResources,
     isGettingFriendList,
     isDeletingFriends,
+    isCancellingFriendRequest,
+    isRejectingFriendRequest,
 
     // 計算屬性
     selectedAccount,
@@ -240,6 +258,8 @@ export const useAppStore = defineStore("app", () => {
     getFriendList,
     deleteFriend,
     deleteAllFriends,
+    cancelAllFriendRequest,
+    rejectAllFriendRequest,
     selectAccount,
     clearSelectedAccount,
   };

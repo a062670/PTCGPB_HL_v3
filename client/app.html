@@ -126,6 +126,22 @@
           </v-btn>
           <v-btn
             v-if="account.isLogin"
+            color="warning"
+            :loading="appStore.isCancellingFriendRequest"
+            @click="appStore.cancelAllFriendRequest(account)"
+          >
+            取消申請
+          </v-btn>
+          <v-btn
+            v-if="account.isLogin"
+            color="warning"
+            :loading="appStore.isRejectingFriendRequest"
+            @click="appStore.rejectAllFriendRequest(account)"
+          >
+            拒絕申請
+          </v-btn>
+          <v-btn
+            v-if="account.isLogin"
             color="info"
             :loading="feedStore.isGettingFeedList"
             @click="

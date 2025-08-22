@@ -213,6 +213,16 @@ class SocketApiService {
     return this.request("deleteAllFriends", { id: accountId });
   }
 
+  // 取消所有好友申請
+  async cancelAllFriendRequest(accountId) {
+    return this.request("cancelAllFriendRequest", { id: accountId });
+  }
+
+  // 拒絕所有好友申請
+  async rejectAllFriendRequest(accountId) {
+    return this.request("rejectAllFriendRequest", { id: accountId });
+  }
+
   // 取得得卡列表
   async getFeedList(accountId) {
     return this.request("getFeedList", { id: accountId });

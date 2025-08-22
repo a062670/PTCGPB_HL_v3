@@ -130,7 +130,7 @@ exports.doApprove = async (accountId) => {
   if (!account) {
     throw new Error("account not found");
   }
-  // await rejectFriendRequest(account);
+  // await rejectAllFriendRequest(account);
   account.isApprove = true;
   account.approveStartAt = Date.now();
   account.approveCount = 0;
@@ -216,6 +216,24 @@ exports.doDeleteAllFriends = async (accountId) => {
     throw new Error("account not found");
   }
   await deleteAllFriends(account);
+  return filterAccount(account);
+};
+
+exports.doCancelAllFriendRequest = async (accountId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  await cancelAllFriendRequest(account);
+  return filterAccount(account);
+};
+
+exports.doRejectAllFriendRequest = async (accountId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  await rejectAllFriendRequest(account);
   return filterAccount(account);
 };
 
@@ -600,6 +618,16 @@ async function deleteAllFriends(account) {
     await FriendClient.DeleteV1(account.headers, friendIds);
   }
 
+  console.log("👋 清空好友列表成功！");
+  await getFriendList(account);
+}
+
+async function cancelAllFriendRequest(account, friendList = null) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  friendList = friendList || (await getFriendList(account));
+
   const requestIds = friendList.data.sentFriendRequestsList
     .map((friend) => friend.toPlayerId)
     .filter(
@@ -612,11 +640,11 @@ async function deleteAllFriends(account) {
     await FriendClient.CancelSentRequestsV1(account.headers, requestIds);
   }
 
-  console.log("👋 清空好友列表成功！");
+  console.log("👋 取消好友申請成功！");
   await getFriendList(account);
 }
 
-async function rejectFriendRequest(account) {
+async function rejectAllFriendRequest(account) {
   if (!account.headers["x-takasho-session-token"]) {
     throw new Error("請先登入！");
   }
@@ -630,6 +658,7 @@ async function rejectFriendRequest(account) {
   }
   await FriendClient.RejectRequestsV1(account.headers, friendIds);
   console.log("👋 拒絕好友申請成功！");
+  await getFriendList(account);
 }
 
 async function sendFriendRequest(account) {
@@ -637,6 +666,8 @@ async function sendFriendRequest(account) {
     throw new Error("請先登入！");
   }
   const friendList = await getFriendList(account);
+
+  await cancelAllFriendRequest(account, friendList);
 
   const playerIds = await getPlayerIds(
     20 - friendList.data.sentFriendRequestsList.length,
@@ -651,11 +682,6 @@ async function sendFriendRequest(account) {
       createdAt: new Date(),
     });
   }
-  // 移除 > 30秒的
-  const now = new Date();
-  account.sendFriendRequestHistory = account.sendFriendRequestHistory.filter(
-    (item) => now - item.createdAt < 30 * 1000
-  );
 
   await FriendClient.SendRequestsV1(account.headers, playerIds);
   console.log("👋 發送好友請求成功！");
@@ -1125,6 +1151,13 @@ function schedule() {
     (async () => {
       while (1) {
         try {
+          // 移除 > 60秒的
+          const now = new Date();
+          account.sendFriendRequestHistory =
+            account.sendFriendRequestHistory.filter(
+              (item) => now - item.createdAt < 60 * 1000
+            );
+
           if (!account.isLogin || !account.isSendFriendRequest) {
             await sleep(1000 * 5);
             continue;

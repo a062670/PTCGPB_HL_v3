@@ -366,6 +366,29 @@ exports.doPurchaseItemShop = async (
   return;
 };
 
+// 清理函數
+exports.cleanup = () => {
+  console.log("🧹 正在清理actions資源...");
+
+  // 停止所有帳號的活動
+  if (accounts) {
+    accounts.forEach((account) => {
+      account.isLogin = false;
+      account.isApprove = false;
+      account.isFreeFeed = false;
+    });
+  }
+
+  // 停止proxy輪換
+  try {
+    Grpc.stopProxyRotation();
+  } catch (error) {
+    console.warn("停止proxy輪換時發生錯誤:", error.message);
+  }
+
+  console.log("✅ Actions清理完成");
+};
+
 // 發送 socket 通知的輔助函數
 function emitToSocket(event, data) {
   if (socketInstance) {

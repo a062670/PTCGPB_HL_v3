@@ -455,3 +455,49 @@ server.listen(webUiPort, () => {
   console.log(`Socket.io 服務器運行在端口 ${webUiPort}`);
   open(`http://localhost:${webUiPort}/`);
 });
+
+// 優雅關閉服務器
+const gracefulShutdown = (signal) => {
+  console.log(`\n🔄 收到 ${signal} 信號，正在關閉服務器...`);
+
+  // 清理actions資源
+  try {
+    actions.cleanup();
+  } catch (error) {
+    console.warn("清理actions時發生錯誤:", error.message);
+  }
+
+  // 關閉所有Socket.IO連接
+  io.close(() => {
+    console.log("✅ Socket.IO 服務器已關閉");
+
+    // 關閉HTTP服務器
+    server.close(() => {
+      console.log("✅ HTTP 服務器已關閉");
+      console.log("✅ 端口已釋放");
+      process.exit(0);
+    });
+
+    // 如果10秒內沒有正常關閉，強制退出
+    setTimeout(() => {
+      console.error("❌ 強制關閉服務器");
+      process.exit(1);
+    }, 10000);
+  });
+};
+
+// 監聽各種退出信號
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGUSR2", () => gracefulShutdown("SIGUSR2")); // nodemon 重啟信號
+
+// 處理未捕獲的異常
+process.on("uncaughtException", (error) => {
+  console.error("❌ 未捕獲的異常:", error);
+  gracefulShutdown("uncaughtException");
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("❌ 未處理的Promise拒絕:", reason);
+  gracefulShutdown("unhandledRejection");
+});

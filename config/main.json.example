@@ -13,6 +13,11 @@
     "id": "",
     "password": ""
   },
+  "proxyList": [
+    "",
+    "http://username:password@proxy-server:port",
+    "http://another-proxy:port"
+  ],
   "auth": {
     "enable": false,
     "username": "aaa",

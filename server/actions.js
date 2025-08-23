@@ -670,10 +670,16 @@ async function sendFriendRequest(account) {
 
   await cancelAllFriendRequest(account, friendList);
 
-  const playerIds = await getPlayerIds(
+  const maxCount = Math.min(
     20 - friendList.data.sentFriendRequestsList.length,
-    account.friendId
+    80 - friendList.data.friendsList.length
   );
+  if (maxCount <= 0) {
+    console.log("👋 好友列表已滿！");
+    return;
+  }
+
+  const playerIds = await getPlayerIds(maxCount, account.friendId);
   // console.log("playerIds", playerIds);
   account.sendFriendRequestPerTimes = playerIds.length;
   account.sendFriendRequestCount += playerIds.length;

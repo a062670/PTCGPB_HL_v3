@@ -459,13 +459,17 @@ function emitToSocket(event, data) {
 }
 
 async function checkVersion() {
-  const version = await fetch(
-    "https://raw.githubusercontent.com/a062670/PTCGPB_HL_v3/refs/heads/hl/config/version.json"
-  );
-  const versionData = await version.json();
-  console.log("versionData", versionData);
-  if (versionData.version !== versionConfig.version) {
-    emitToSocket("updateLastVersion", versionData.version);
+  try {
+    const version = await fetch(
+      "https://raw.githubusercontent.com/a062670/PTCGPB_HL_v3/refs/heads/hl/config/version.json"
+    );
+    const versionData = await version.json();
+    console.log("versionData", versionData);
+    if (versionData.version !== versionConfig.version) {
+      emitToSocket("updateLastVersion", versionData.version);
+    }
+  } catch (error) {
+    console.error("checkVersion error");
   }
 }
 

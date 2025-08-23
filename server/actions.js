@@ -623,7 +623,6 @@ async function deleteAllFriends(account) {
   }
 
   console.log("👋 清空好友列表成功！");
-  await getFriendList(account);
 }
 
 async function cancelAllFriendRequest(account, friendList = null) {
@@ -645,7 +644,6 @@ async function cancelAllFriendRequest(account, friendList = null) {
   }
 
   console.log("👋 取消好友申請成功！");
-  await getFriendList(account);
 }
 
 async function rejectAllFriendRequest(account) {
@@ -662,7 +660,6 @@ async function rejectAllFriendRequest(account) {
   }
   await FriendClient.RejectRequestsV1(account.headers, friendIds);
   console.log("👋 拒絕好友申請成功！");
-  await getFriendList(account);
 }
 
 async function sendFriendRequest(account) {

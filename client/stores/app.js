@@ -184,6 +184,7 @@ export const useAppStore = defineStore("app", () => {
     isDeletingFriends.value = true;
     const result = await socketApiService.deleteAllFriends(account.id);
     updateAccount(account, result.data);
+    await socketApiService.getFriendList(account.id);
     isDeletingFriends.value = false;
   };
 
@@ -191,6 +192,7 @@ export const useAppStore = defineStore("app", () => {
     isCancellingFriendRequest.value = true;
     const result = await socketApiService.cancelAllFriendRequest(account.id);
     updateAccount(account, result.data);
+    await socketApiService.getFriendList(account.id);
     isCancellingFriendRequest.value = false;
   };
 
@@ -198,6 +200,7 @@ export const useAppStore = defineStore("app", () => {
     isRejectingFriendRequest.value = true;
     const result = await socketApiService.rejectAllFriendRequest(account.id);
     updateAccount(account, result.data);
+    await socketApiService.getFriendList(account.id);
     isRejectingFriendRequest.value = false;
   };
 

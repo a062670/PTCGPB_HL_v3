@@ -676,6 +676,7 @@ async function sendFriendRequest(account) {
   );
   if (maxCount <= 0) {
     console.log("👋 好友列表已滿！");
+    account.sendFriendRequestPerTimes = 0;
     return;
   }
 

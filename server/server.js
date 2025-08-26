@@ -480,6 +480,15 @@ io.on("connection", (socket) => {
     });
   });
 
+  // 取得神包列表
+  socket.on("getGodPackList", async (data) => {
+    console.log("收到 getGodPackList 請求");
+    const godPackList = await actions.doGetGodPackList();
+    await handleSocketEvent(socket, "getGodPackList", () => {
+      return godPackList;
+    });
+  });
+
   // 斷線處理
   socket.on("disconnect", () => {
     console.log("客戶端已斷線:", socket.id);

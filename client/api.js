@@ -360,6 +360,11 @@ class SocketApiService {
       times,
     });
   }
+
+  // 取得神包列表
+  async getGodPackList() {
+    return this.request("getGodPackList", {});
+  }
 }
 
 // 建立全域 Socket API 服務實例

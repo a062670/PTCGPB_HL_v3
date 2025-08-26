@@ -109,10 +109,11 @@
             color="info"
             :loading="appStore.isGettingFriendList"
             @click="
-            appStore.showType = 'friendList';
-            appStore.selectAccount(account);
-            appStore.getFriendList(account)
-          "
+              appStore.showType = 'friendList';
+              appStore.selectAccount(account);
+              appStore.getFriendList(account);
+              appStore.getGodPackList();
+            "
           >
             好友列表
           </v-btn>
@@ -145,11 +146,11 @@
             color="info"
             :loading="feedStore.isGettingFeedList"
             @click="
-            appStore.showType = 'feedList';
-            feedStore.clearAll();
-            appStore.selectAccount(account);
-            feedStore.getFeedList(account);
-          "
+              appStore.showType = 'feedList';
+              feedStore.clearAll();
+              appStore.selectAccount(account);
+              feedStore.getFeedList(account);
+            "
           >
             得卡列表
           </v-btn>
@@ -158,11 +159,11 @@
             color="info"
             :loading="presentBoxStore.isGettingPresentBoxList"
             @click="
-            appStore.showType = 'presentBoxList';
-            presentBoxStore.clearAll();
-            appStore.selectAccount(account);
-            presentBoxStore.getPresentBoxList(account);
-          "
+              appStore.showType = 'presentBoxList';
+              presentBoxStore.clearAll();
+              appStore.selectAccount(account);
+              presentBoxStore.getPresentBoxList(account);
+            "
           >
             禮物盒
           </v-btn>
@@ -171,11 +172,11 @@
             color="info"
             :loading="eventBattleStore.isGettingInfo"
             @click="
-            appStore.showType = 'eventBattle'; 
-            eventBattleStore.clearAll(); 
-            appStore.selectAccount(account);
-            eventBattleStore.getInfo(account);
-          "
+              appStore.showType = 'eventBattle'; 
+              eventBattleStore.clearAll(); 
+              appStore.selectAccount(account);
+              eventBattleStore.getInfo(account);
+            "
           >
             活動戰鬥
           </v-btn>
@@ -184,11 +185,11 @@
             color="info"
             :loading="packStore.isGettingPackPower"
             @click="
-            appStore.showType = 'pack';
-            packStore.clearAll();
-            appStore.selectAccount(account);
-            packStore.getPackPower(account);
-          "
+              appStore.showType = 'pack';
+              packStore.clearAll();
+              appStore.selectAccount(account);
+              packStore.getPackPower(account);
+            "
           >
             開包
           </v-btn>
@@ -266,21 +267,32 @@
       </div>
       <!-- 好友列表 -->
       <div v-if="appStore.showType === 'friendList'">
-        <div>好友列表</div>
+        <div class="d-flex ga-2 align-center mb-2">
+          好友列表
+          <v-btn color="primary" @click="appStore.getGodPackList()">
+            更新神包
+          </v-btn>
+        </div>
         <div class="d-flex flex-column ga-2">
           <div
             v-for="friend in appStore.selectedAccount.friendList.friendsList"
             :key="friend.friendId"
-            class="d-flex ga-2 align-center"
           >
-            <div>{{ friend.profile.nickname }}</div>
-            <v-btn
-              color="error"
-              :loading="appStore.isDeletingFriends"
-              @click="appStore.deleteFriend(appStore.selectedAccount, friend.playerId)"
-            >
-              刪除
-            </v-btn>
+            <div class="d-flex ga-2 align-center">
+              <div>{{ friend.profile.nickname }}</div>
+              <v-btn
+                color="error"
+                :loading="appStore.isDeletingFriends"
+                @click="appStore.deleteFriend(appStore.selectedAccount, friend.playerId)"
+              >
+                刪除
+              </v-btn>
+            </div>
+            <CardList
+              :cardStore="appStore.selectedAccount.playerResources.cardStocks"
+              :cards="appStore.findGodPack(friend.playerId)"
+              card-type="card"
+            />
           </div>
         </div>
       </div>

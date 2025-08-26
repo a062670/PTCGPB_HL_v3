@@ -19,6 +19,7 @@ export const useAppStore = defineStore("app", () => {
 
   // 資料相關
   const showType = ref("");
+  const godPackList = ref([]);
 
   const isLoggingIn = ref(false);
   const isApproving = ref(false);
@@ -204,6 +205,22 @@ export const useAppStore = defineStore("app", () => {
     isRejectingFriendRequest.value = false;
   };
 
+  const getGodPackList = async () => {
+    const result = await socketApiService.getGodPackList();
+    godPackList.value = result.data;
+  };
+  const findGodPack = (playerId) => {
+    const find = godPackList.value.find((item) => item.playerId === playerId);
+    if (find) {
+      return JSON.parse(find.cardIds).map((cardId) => {
+        return {
+          cardId,
+        };
+      });
+    }
+    return null;
+  };
+
   const selectAccount = (account) => {
     selectedAccountId.value = account.id;
   };
@@ -231,6 +248,7 @@ export const useAppStore = defineStore("app", () => {
     selectedAccountId,
 
     showType,
+    godPackList,
 
     isLoggingIn,
     isApproving,
@@ -263,6 +281,8 @@ export const useAppStore = defineStore("app", () => {
     deleteAllFriends,
     cancelAllFriendRequest,
     rejectAllFriendRequest,
+    getGodPackList,
+    findGodPack,
     selectAccount,
     clearSelectedAccount,
   };

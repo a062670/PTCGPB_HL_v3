@@ -1,8 +1,14 @@
 const fs = require("fs");
 const path = require("path");
+const sqlite3 = require("sqlite3");
+const sqlite = require("sqlite");
 
 const { sleep } = require("../lib/Units.js");
-const { heartbeat, getPlayerIds } = require("../lib/packer/index.js");
+const {
+  heartbeat,
+  getPlayerIds,
+  getGodPackList,
+} = require("../lib/packer/index.js");
 const Grpc = require("../lib/Grpc.js");
 const Login = require("../steps/Login.js");
 const SystemClient = require("../steps/SystemClient.js");
@@ -27,6 +33,9 @@ Grpc.setMaxRetries(0);
 
 let accounts;
 let socketInstance = null; // 用於存儲 socket 實例
+
+let db = null;
+let godPackList = [];
 
 exports.init = () => {
   accounts = mainConfig.deviceAccounts.map((acc) => ({
@@ -426,6 +435,11 @@ exports.doPurchaseItemShop = async (
   }
   await purchaseItemShop(account, productId, ticketAmount, times);
   return;
+};
+
+/** 取得神包列表 */
+exports.doGetGodPackList = async () => {
+  return godPackList;
 };
 
 // 清理函數
@@ -1071,12 +1085,30 @@ function filterAccount(account) {
 }
 
 // 排程
-function schedule() {
+async function schedule() {
   // 全域未處理的 Promise 拒絕處理
   process.on("unhandledRejection", (reason, promise) => {
     console.error("未處理的 Promise 拒絕:", reason);
     console.error("Promise:", promise);
   });
+
+  // 初始化資料庫
+  if (!fs.existsSync(path.join(__dirname, "..", "data"))) {
+    fs.mkdirSync(path.join(__dirname, "..", "data"));
+  }
+  db = await sqlite.open({
+    filename: path.join(__dirname, "..", "data", "database.db"),
+    driver: sqlite3.Database,
+  });
+  // 建立資料庫(神包)
+  await db.exec(
+    `CREATE TABLE IF NOT EXISTS godPack (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      playerId TEXT UNIQUE,
+      cardIds TEXT,
+      createdAt INTEGER
+    )`
+  );
 
   // 登入排程
   (async () => {
@@ -1260,6 +1292,39 @@ function schedule() {
       }
     })();
   }
+
+  // 每分鐘取得神包資訊
+  (async () => {
+    godPackList = await db.all("SELECT * FROM godPack");
+    console.log("init godPackList", godPackList);
+    let lastGetAt = 0;
+    while (1) {
+      const data = await getGodPackList(lastGetAt);
+      console.log("getGodPackList", data);
+      if (data.length) {
+        lastGetAt = data[data.length - 1].createdAt;
+        const newItems = data.filter(
+          (i) => !godPackList.some((j) => j.playerId === i.playerId)
+        );
+        for (const item of newItems) {
+          await db.run(
+            "INSERT INTO godPack (playerId, cardIds, createdAt) VALUES (?, ?, ?)",
+            [item.playerId, JSON.stringify(item.cardIds), item.createdAt]
+          );
+        }
+      }
+
+      // 刪除 3 天前的資料
+      await db.run("DELETE FROM godPack WHERE createdAt < ?", [
+        Date.now() - 1000 * 60 * 60 * 24 * 3,
+      ]);
+
+      godPackList = await db.all("SELECT * FROM godPack");
+      console.log("godPackList", godPackList);
+
+      await sleep(1000 * 60 * 1);
+    }
+  })();
 
   // 每隔一小時檢查版本
   (async () => {

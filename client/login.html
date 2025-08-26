@@ -43,10 +43,21 @@
     <form id="box" onsubmit="login(event)">
       <input type="text" id="username" placeholder="username" />
       <input type="password" id="password" placeholder="password" />
+      <div>
+        <input type="checkbox" id="remember" />
+        <label for="remember">remember me</label>
+      </div>
       <button type="submit">login</button>
     </form>
 
     <script>
+      const username = localStorage.getItem("username");
+      const password = localStorage.getItem("password");
+      if (username && password) {
+        document.getElementById("username").value = username;
+        document.getElementById("password").value = password;
+        document.getElementById("remember").checked = true;
+      }
       function login(event) {
         event.preventDefault();
         console.log("login");
@@ -60,6 +71,10 @@
           },
         }).then((res) => {
           if (res.ok) {
+            if (document.getElementById("remember").checked) {
+              localStorage.setItem("username", username);
+              localStorage.setItem("password", password);
+            }
             window.location.href = "/";
           } else {
             alert("login failed");

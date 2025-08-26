@@ -641,9 +641,10 @@ async function cancelAllFriendRequest(account, friendList = null) {
     );
   if (requestIds.length > 0) {
     await FriendClient.CancelSentRequestsV1(account.headers, requestIds);
+    console.log("👋 取消好友申請成功！");
+  } else {
+    console.log("👋 沒有待取消好友申請！");
   }
-
-  console.log("👋 取消好友申請成功！");
 }
 
 async function rejectAllFriendRequest(account) {

@@ -1,7 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const sqlite3 = require("sqlite3");
-const sqlite = require("sqlite");
+const Database = require("better-sqlite3");
 
 const { sleep } = require("../lib/Units.js");
 const {
@@ -460,6 +459,16 @@ exports.cleanup = () => {
     Grpc.stopProxyRotation();
   } catch (error) {
     console.warn("停止proxy輪換時發生錯誤:", error.message);
+  }
+
+  // 關閉資料庫連接
+  if (db) {
+    try {
+      db.close();
+      console.log("✅ 資料庫連接已關閉");
+    } catch (error) {
+      console.warn("關閉資料庫連接時發生錯誤:", error.message);
+    }
   }
 
   console.log("✅ Actions清理完成");
@@ -1096,12 +1105,9 @@ async function schedule() {
   if (!fs.existsSync(path.join(__dirname, "..", "data"))) {
     fs.mkdirSync(path.join(__dirname, "..", "data"));
   }
-  db = await sqlite.open({
-    filename: path.join(__dirname, "..", "data", "database.db"),
-    driver: sqlite3.Database,
-  });
+  db = new Database(path.join(__dirname, "..", "data", "database.db"));
   // 建立資料庫(神包)
-  await db.exec(
+  db.exec(
     `CREATE TABLE IF NOT EXISTS godPack (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       playerId TEXT UNIQUE,
@@ -1295,7 +1301,8 @@ async function schedule() {
 
   // 每分鐘取得神包資訊
   (async () => {
-    godPackList = await db.all("SELECT * FROM godPack");
+    // 初始化資料
+    godPackList = db.prepare("SELECT * FROM godPack").all();
     console.log("init godPackList", godPackList);
     let lastGetAt = 0;
     while (1) {
@@ -1307,19 +1314,18 @@ async function schedule() {
           (i) => !godPackList.some((j) => j.playerId === i.playerId)
         );
         for (const item of newItems) {
-          await db.run(
-            "INSERT INTO godPack (playerId, cardIds, createdAt) VALUES (?, ?, ?)",
-            [item.playerId, JSON.stringify(item.cardIds), item.createdAt]
-          );
+          db.prepare(
+            "INSERT INTO godPack (playerId, cardIds, createdAt) VALUES (?, ?, ?)"
+          ).run([item.playerId, JSON.stringify(item.cardIds), item.createdAt]);
         }
       }
 
       // 刪除 3 天前的資料
-      await db.run("DELETE FROM godPack WHERE createdAt < ?", [
+      db.prepare("DELETE FROM godPack WHERE createdAt < ?").run([
         Date.now() - 1000 * 60 * 60 * 24 * 3,
       ]);
 
-      godPackList = await db.all("SELECT * FROM godPack");
+      godPackList = db.prepare("SELECT * FROM godPack").all();
       console.log("godPackList", godPackList);
 
       await sleep(1000 * 60 * 1);

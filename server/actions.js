@@ -1326,7 +1326,6 @@ async function schedule() {
       ]);
 
       godPackList = db.prepare("SELECT * FROM godPack").all();
-      console.log("godPackList", godPackList);
 
       await sleep(1000 * 60 * 1);
     }

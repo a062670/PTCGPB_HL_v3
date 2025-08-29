@@ -25,6 +25,7 @@ const MissionClient = require("../steps/MissionClient.js");
 
 const mainConfig = require("../config/main.json");
 const eventBattleConfig = require("../config/eventBattle.json");
+const battleIdsConfig = require("../config/battleIds.json");
 const packConfig = require("../config/pack.json");
 const versionConfig = require("../config/version.json");
 
@@ -361,12 +362,17 @@ exports.doGetEventPowers = async (accountId) => {
   if (!account) {
     throw new Error("account not found");
   }
-  const eventPowers = await getEventPowers(account, [eventBattleConfig.id]);
-  if (!eventPowers[0]) {
-    return null;
+  let eventPower = null;
+  if (
+    Date.now() > eventBattleConfig.startAt &&
+    Date.now() < eventBattleConfig.endAt
+  ) {
+    const resp = await getEventPowers(account, [eventBattleConfig.id]);
+    eventPower = resp[0] || null;
   }
+
   return {
-    eventPower: eventPowers[0],
+    eventPower,
     event: eventBattleConfig,
   };
 };
@@ -387,6 +393,30 @@ exports.doFinishEventBattle = async (accountId, battleId, myDeckId, token) => {
     throw new Error("account not found");
   }
   await finishEventBattle(account, battleId, myDeckId, token);
+  return;
+};
+
+/** 取得戰鬥 ID 列表 */
+exports.doGetBattleIds = async () => {
+  return battleIdsConfig;
+};
+
+/** 開始戰鬥 */
+exports.doStartStepupBattle = async (accountId, battleId, myDeckId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  return await startStepupBattle(account, battleId, myDeckId);
+};
+
+/** 結束戰鬥 */
+exports.doFinishStepupBattle = async (accountId, battleId, myDeckId, token) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  await finishStepupBattle(account, battleId, myDeckId, token);
   return;
 };
 
@@ -990,6 +1020,31 @@ async function finishEventBattle(account, battleId, myDeckId, token) {
   return;
 }
 
+async function startStepupBattle(account, battleId, myDeckId) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const stepupBattle = await SoloBattleClient.StartStepupBattleV1(
+    account.headers,
+    battleId,
+    myDeckId
+  );
+  return stepupBattle.data;
+}
+
+async function finishStepupBattle(account, battleId, myDeckId, token) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  await SoloBattleClient.FinishStepupBattleV1(
+    account.headers,
+    battleId,
+    myDeckId,
+    token
+  );
+  return;
+}
+
 /** 取得開包力 */
 async function getPackPower(account) {
   if (!account.headers["x-takasho-session-token"]) {
@@ -1303,7 +1358,6 @@ async function schedule() {
   (async () => {
     // 初始化資料
     godPackList = db.prepare("SELECT * FROM godPack").all();
-    console.log("init godPackList", godPackList);
     let lastGetAt = 0;
     while (1) {
       const data = await getGodPackList(lastGetAt);

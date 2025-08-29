@@ -433,6 +433,42 @@ io.on("connection", (socket) => {
     });
   });
 
+  // 取得戰鬥 ID 列表
+  socket.on("getBattleIds", async (data) => {
+    console.log("收到 getBattleIds 請求");
+    const battleIds = await actions.doGetBattleIds();
+    await handleSocketEvent(socket, "getBattleIds", () => {
+      return battleIds;
+    });
+  });
+
+  // 開始戰鬥
+  socket.on("startStepupBattle", async (data) => {
+    console.log("收到 startStepupBattle 請求");
+    const stepupBattle = await actions.doStartStepupBattle(
+      data.id,
+      data.battleId,
+      data.myDeckId
+    );
+    await handleSocketEvent(socket, "startStepupBattle", () => {
+      return stepupBattle;
+    });
+  });
+
+  // 結束戰鬥
+  socket.on("finishStepupBattle", async (data) => {
+    console.log("收到 finishStepupBattle 請求");
+    await actions.doFinishStepupBattle(
+      data.id,
+      data.battleId,
+      data.myDeckId,
+      data.token
+    );
+    await handleSocketEvent(socket, "finishStepupBattle", () => {
+      return {};
+    });
+  });
+
   // 取得開包力
   socket.on("getPackPower", async (data) => {
     console.log("收到 getPackPower 請求");

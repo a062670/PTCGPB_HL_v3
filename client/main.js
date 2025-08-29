@@ -2,7 +2,7 @@ import { useAppStore } from "./stores/app.js";
 import { useThemeStore } from "./stores/theme.js";
 import { usePresentBoxStore } from "./stores/presentBox.js";
 import { useFeedStore } from "./stores/feed.js";
-import { useEventBattleStore } from "./stores/eventBattle.js";
+import { useBattleStore } from "./stores/battle.js";
 import { usePackStore } from "./stores/pack.js";
 import { useItemShopStore } from "./stores/itemShop.js";
 import { useMissionStore } from "./stores/mission.js";
@@ -56,7 +56,7 @@ async function loadTemplate() {
       const themeStore = useThemeStore();
       const presentBoxStore = usePresentBoxStore();
       const feedStore = useFeedStore();
-      const eventBattleStore = useEventBattleStore();
+      const battleStore = useBattleStore();
       const packStore = usePackStore();
       const itemShopStore = useItemShopStore();
       const missionStore = useMissionStore();
@@ -75,6 +75,9 @@ async function loadTemplate() {
 
         // 載入帳號列表
         appStore.loadAccounts();
+
+        // 初始化戰鬥 Store
+        battleStore.init();
       });
 
       return {
@@ -82,7 +85,7 @@ async function loadTemplate() {
         themeStore,
         presentBoxStore,
         feedStore,
-        eventBattleStore,
+        battleStore,
         packStore,
         itemShopStore,
         missionStore,

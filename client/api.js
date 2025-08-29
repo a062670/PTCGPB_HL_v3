@@ -328,6 +328,30 @@ class SocketApiService {
     });
   }
 
+  // 取得戰鬥 ID 列表
+  async getBattleIds() {
+    return this.request("getBattleIds", {});
+  }
+
+  // 開始戰鬥
+  async startStepupBattle(accountId, battleId, myDeckId) {
+    return this.request("startStepupBattle", {
+      id: accountId,
+      battleId,
+      myDeckId,
+    });
+  }
+
+  // 結束戰鬥
+  async finishStepupBattle(accountId, battleId, myDeckId, token) {
+    return this.request("finishStepupBattle", {
+      id: accountId,
+      battleId,
+      myDeckId,
+      token,
+    });
+  }
+
   // 取得開包力
   async getPackPower(accountId) {
     return this.request("getPackPower", { id: accountId });

@@ -170,15 +170,15 @@
           <v-btn
             v-if="account.isLogin"
             color="info"
-            :loading="eventBattleStore.isGettingInfo"
+            :loading="battleStore.isGettingInfo"
             @click="
-              appStore.showType = 'eventBattle'; 
-              eventBattleStore.clearAll(); 
+              appStore.showType = 'battle'; 
+              battleStore.clearAll(); 
               appStore.selectAccount(account);
-              eventBattleStore.getInfo(account);
+              battleStore.getInfo(account);
             "
           >
-            活動戰鬥
+            快速戰鬥
           </v-btn>
           <v-btn
             v-if="account.isLogin"
@@ -490,41 +490,65 @@
           </div>
         </div>
       </div>
-      <!-- 事件戰鬥 -->
-      <div v-if="appStore.showType === 'eventBattle'">
-        <div>活動戰鬥</div>
+      <!-- 快速戰鬥 -->
+      <div v-if="appStore.showType === 'battle'">
+        <div>快速戰鬥</div>
         <div>
           <div>排組</div>
-          <v-radio-group v-model="eventBattleStore.myDeckId" inline>
+          <v-radio-group v-model="battleStore.myDeckId" inline hide-details>
             <v-radio
-              v-for="deck in eventBattleStore.deckList"
+              v-for="deck in battleStore.deckList"
               :key="deck.deckId"
               :label="deck.deckName"
               :value="deck.deckId"
             ></v-radio>
           </v-radio-group>
         </div>
-        <div v-if="eventBattleStore.eventPower">
+        <div class="d-flex ga-4 align-center">
+          <div style="width: 150px">
+            <v-slider
+              :model-value="battleStore.soundVolume"
+              :min="0"
+              :max="1"
+              :step="0.1"
+              label="音量"
+              hide-details
+              @update:model-value="battleStore.setVolume"
+            />
+          </div>
+          <v-btn color="error" @click="battleStore.stopSound">停止</v-btn>
+        </div>
+        <div class="my-2">活動戰鬥</div>
+        <div v-if="battleStore.eventPower">
           <div class="d-flex ga-2 align-center">
+            <div>戰鬥力: {{ battleStore.eventPower.eventPower.amount }}</div>
             <div>
-              戰鬥力: {{ eventBattleStore.eventPower.eventPower.amount }}
-            </div>
-            <div>
-              自動回復: {{
-              eventBattleStore.eventPower.eventPower.nextAutoHealedAt }}
+              自動回復: {{ battleStore.eventPower.eventPower.nextAutoHealedAt }}
             </div>
           </div>
           <div class="d-flex ga-2 align-center">
             <v-btn
-              v-for="eventId in eventBattleStore.eventPower.event.ids"
+              v-for="eventId in battleStore.eventPower.event.ids"
               :key="eventId"
               color="primary"
-              :loading="eventBattleStore.isBattleRunning"
-              @click="eventBattleStore.runBattle(appStore.selectedAccount, eventId)"
+              :loading="battleStore.isBattleRunning"
+              @click="battleStore.runEventBattle(appStore.selectedAccount, eventId)"
             >
               {{ eventId }}
             </v-btn>
           </div>
+        </div>
+        <div class="my-2">一般戰鬥</div>
+        <div class="d-flex ga-2 align-center flex-wrap">
+          <v-btn
+            v-for="battleId in battleStore.battleIds"
+            :key="battleId"
+            color="primary"
+            :loading="battleStore.isBattleRunning"
+            @click="battleStore.runStepupBattle(appStore.selectedAccount, battleId)"
+          >
+            {{ battleId }}
+          </v-btn>
         </div>
       </div>
       <!-- 開包 -->

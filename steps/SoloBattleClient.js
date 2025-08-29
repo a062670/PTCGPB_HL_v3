@@ -15,7 +15,7 @@ const { getCachedBytes } = require("../lib/Units.js");
 // const checkCooldown = require("../lib/cooldown.js");
 // let lastTimeFinishStepupBattleV1 = null;
 
-const StartStepupBattleV1 = async (headers, soloStepupBattleId) => {
+const StartStepupBattleV1 = async (headers, soloStepupBattleId, myDeckId) => {
   const bytes = getCachedBytes(
     ["SoloBattle/StartStepupBattleV1", soloStepupBattleId],
     () => {
@@ -27,7 +27,7 @@ const StartStepupBattleV1 = async (headers, soloStepupBattleId) => {
         SoloBattleDeckProto.SoloBattleDeck.Types.DeckType.DECK_TYPE_MY_DECK
       );
       deck.setRentalDeckId("");
-      deck.setMyDeckId(1);
+      deck.setMyDeckId(myDeckId);
 
       request.setSoloStepupBattleId(soloStepupBattleId);
       request.setDeck(deck);
@@ -58,21 +58,12 @@ const StartStepupBattleV1 = async (headers, soloStepupBattleId) => {
 const FinishStepupBattleV1 = async (
   headers,
   soloStepupBattleId,
+  myDeckId,
   soloStepupBattleToken
 ) => {
-  // lastTimeFinishStepupBattleV1 = await checkCooldown(
-  //   lastTimeFinishStepupBattleV1,
-  //   1 * 1000
-  // );
-
   const request =
     new SoloBattleFinishStepupBattleProto.SoloBattleFinishStepupBattleV1.Types.Request();
 
-  /**
-      repeated takasho.schema.lettuce_server.resource.solo_battle.SoloBattleTryProgress battle_try_progresses = 3;
-      takasho.schema.lettuce_server.resource.solo_battle.SoloBattleInGameStatistics battle_stats = 6;
-
- */
   request.setBattleId(soloStepupBattleId);
   request.setBattleSessionToken(soloStepupBattleToken);
   request.setResultType(
@@ -84,22 +75,40 @@ const FinishStepupBattleV1 = async (
     SoloBattleDeckProto.SoloBattleDeck.Types.DeckType.DECK_TYPE_MY_DECK
   );
   deck.setRentalDeckId("");
-  deck.setMyDeckId(1);
+  deck.setMyDeckId(myDeckId);
   request.setDeck(deck);
 
-  const battleTryProgress =
-    new SoloBattleTryProgressProto.SoloBattleTryProgress();
-  battleTryProgress.setBattleTryId(`BT_TR_${soloStepupBattleId}_02`);
-  battleTryProgress.setCurrentCount(4);
-  request.setBattleTryProgressesList([battleTryProgress]);
+  const battleTryProgressesList = [];
+  let currentCountSetting = [];
+  if (soloStepupBattleId.startsWith("BEGINNER")) {
+    currentCountSetting = [1, 4];
+  } else if (soloStepupBattleId.startsWith("INTERMEDIATE")) {
+    currentCountSetting = [2, 1, 1];
+  } else if (soloStepupBattleId.startsWith("ADVANCED")) {
+    currentCountSetting = [1, 100, 1, 1];
+  } else if (soloStepupBattleId.startsWith("EXPERT")) {
+    currentCountSetting = [1, 1, 1, 1, 1500];
+  }
+
+  currentCountSetting.forEach((count, index) => {
+    const battleTryProgress =
+      new SoloBattleTryProgressProto.SoloBattleTryProgress();
+    battleTryProgress.setBattleTryId(
+      `BT_TR_${soloStepupBattleId}_0${index + 1}`
+    );
+    battleTryProgress.setCurrentCount(count);
+    battleTryProgressesList.push(battleTryProgress);
+  });
+
+  request.setBattleTryProgressesList(battleTryProgressesList);
 
   const battleStats =
     new SoloBattleInGameStatisticsProto.SoloBattleInGameStatistics();
-  // battleStats.setIsConcede(false);
-  battleStats.setTurnNum(15);
+  battleStats.setIsConcede(false);
+  battleStats.setTurnNum(12);
   battleStats.setPre(true);
   battleStats.setPlayerPoint(3);
-  // battleStats.setTargetPlayerPoint(10);
+  battleStats.setTargetPlayerPoint(0);
   battleStats.setAutoFlg(true);
   request.setBattleStats(battleStats);
 

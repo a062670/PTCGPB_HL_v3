@@ -20,9 +20,32 @@ export const useBattleStore = defineStore("battle", () => {
   const startEventBattleResult = ref(null);
   const startStepupBattleResult = ref(null);
   const myDeckId = ref(null);
+  const pack = ref(null);
+  const difficulty = ref(null);
+  const lastBattleId = ref(null);
 
   const isGettingInfo = ref(false);
   const isBattleRunning = ref(false);
+
+  const packOptions = computed(() => {
+    const packs = battleIds.value.map((item) => item.pack);
+    return [...new Set(packs)];
+  });
+
+  const difficultyOptions = computed(() => {
+    const difficulties = battleIds.value.map((item) => item.difficulty);
+    return [...new Set(difficulties)];
+  });
+
+  const battleIdsFiltered = computed(() => {
+    if (!pack.value || !difficulty.value) return [];
+    return (
+      battleIds.value.find(
+        (item) =>
+          item.pack === pack.value && item.difficulty === difficulty.value
+      )?.ids || []
+    );
+  });
 
   const init = () => {
     soundBattle.value = new Audio("/assets/sounds/28.mp3");
@@ -56,14 +79,21 @@ export const useBattleStore = defineStore("battle", () => {
   };
 
   const getBattleIds = async (account) => {
-    const response = await socketApiService.getBattleIds(account.id);
-    battleIds.value = response.data;
+    if (!battleIds.value.length) {
+      const response = await socketApiService.getBattleIds(account.id);
+      battleIds.value = response.data;
+    }
   };
 
   const getDeckList = async (account) => {
     const response = await socketApiService.getDeckList(account.id);
     deckList.value = response.data;
-    myDeckId.value = deckList.value[0]?.deckId || null;
+    if (
+      !myDeckId.value ||
+      !deckList.value.some((item) => item.deckId === myDeckId.value)
+    ) {
+      myDeckId.value = deckList.value[0]?.deckId || null;
+    }
   };
 
   const getEventPowers = async (account) => {
@@ -136,6 +166,8 @@ export const useBattleStore = defineStore("battle", () => {
     }
     isBattleRunning.value = true;
 
+    lastBattleId.value = battleId;
+
     soundBattleFinish.value.pause();
     soundBattle.value.currentTime = 0;
     soundBattle.value.play();
@@ -191,7 +223,15 @@ export const useBattleStore = defineStore("battle", () => {
     battleIds,
     startEventBattleResult,
     myDeckId,
+    pack,
+    difficulty,
+    lastBattleId,
     isBattleRunning,
+
+    // 計算屬性
+    packOptions,
+    difficultyOptions,
+    battleIdsFiltered,
 
     init,
     setVolume,

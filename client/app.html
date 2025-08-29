@@ -538,10 +538,22 @@
             </v-btn>
           </div>
         </div>
-        <div class="my-2">一般戰鬥</div>
+        <div class="my-2">一般戰鬥 - 上次: {{ battleStore.lastBattleId }}</div>
+        <div class="d-flex ga-2 align-center">
+          <v-select
+            v-model="battleStore.pack"
+            :items="battleStore.packOptions"
+            label="包"
+          />
+          <v-select
+            v-model="battleStore.difficulty"
+            :items="battleStore.difficultyOptions"
+            label="難度"
+          />
+        </div>
         <div class="d-flex ga-2 align-center flex-wrap">
           <v-btn
-            v-for="battleId in battleStore.battleIds"
+            v-for="battleId in battleStore.battleIdsFiltered"
             :key="battleId"
             color="primary"
             :loading="battleStore.isBattleRunning"

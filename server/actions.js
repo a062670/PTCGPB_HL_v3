@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const Database = require("better-sqlite3");
+const moment = require("moment");
 
 const { sleep } = require("../lib/Units.js");
 const {
@@ -63,6 +64,8 @@ exports.init = () => {
     sendFriendRequestPerTimes: 0,
     /** 發送好友請求紀錄 */
     sendFriendRequestHistory: [],
+    /** 紀錄每分鐘發送好友請求次數 */
+    sendFriendRequestByMinute: [],
 
     /** 免費得卡開始時間 */
     isFreeFeed: false,
@@ -178,6 +181,7 @@ exports.doStopSendFriendRequest = async (accountId) => {
   account.isSendFriendRequest = false;
   account.sendFriendRequestStartAt = 0;
   account.sendFriendRequestCount = 0;
+  account.sendFriendRequestByMinute = [];
   return filterAccount(account);
 };
 
@@ -738,6 +742,24 @@ async function sendFriendRequest(account) {
   // console.log("playerIds", playerIds);
   account.sendFriendRequestPerTimes = playerIds.length;
   account.sendFriendRequestCount += playerIds.length;
+
+  const timeString = moment().format("YYYY-MM-DD HH:mm");
+  let history = account.sendFriendRequestByMinute.find(
+    (item) => item.timeString === timeString
+  );
+  if (!history) {
+    history = {
+      timeString,
+      count: playerIds.length,
+    };
+    account.sendFriendRequestByMinute.push(history);
+    while (account.sendFriendRequestByMinute.length > 6) {
+      account.sendFriendRequestByMinute.shift();
+    }
+  } else {
+    history.count += playerIds.length;
+  }
+
   for (const playerId of playerIds) {
     account.sendFriendRequestHistory.push({
       playerId,
@@ -1137,6 +1159,16 @@ function filterAccount(account) {
           1000 *
           60
       ) || 0,
+    sendFriendRequestPerMinuteRealTime:
+      account.sendFriendRequestByMinute.length >= 6
+        ? Math.floor(
+            (account.sendFriendRequestByMinute[1].count +
+              account.sendFriendRequestByMinute[2].count +
+              account.sendFriendRequestByMinute[3].count +
+              account.sendFriendRequestByMinute[4].count) /
+              4
+          )
+        : 0,
 
     isFreeFeed: account.isFreeFeed,
     freeFeedStartAt: account.freeFeedStartAt,

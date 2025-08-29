@@ -28,7 +28,13 @@
       <div :class="{ 'text-red': account.friendList.count[0] >= 90 }">
         好友: {{ account.friendList.count.join("-") }}
         <!-- <span>(APM: {{account.approvePerMinute }})</span> -->
-        <span>(SPM: {{account.sendFriendRequestPerMinute }})</span>
+        <span>
+          (SPM:
+          <span>{{ account.sendFriendRequestPerMinuteRealTime }}</span>
+          :
+          <span>{{ account.sendFriendRequestPerMinute }}</span>
+          )
+        </span>
       </div>
       <div v-if="account.isSendFriendRequest">
         搶到 {{ account.sendFriendRequestPerTimes }} 個好友

@@ -48,7 +48,7 @@ export const useFriendStore = defineStore("friend", () => {
 
   const deleteAllFriends = async (account) => {
     isLockFriendActions.value = true;
-    await socketApiService.cancelAllFriendRequest(account.id);
+    await socketApiService.deleteAllFriends(account.id);
     await socketApiService.getFriendList(account.id);
     isLockFriendActions.value = false;
   };

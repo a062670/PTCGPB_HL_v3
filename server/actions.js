@@ -657,7 +657,16 @@ async function deleteFriend(account, playerIds) {
   if (!account.headers["x-takasho-session-token"]) {
     throw new Error("請先登入！");
   }
-  await FriendClient.DeleteV1(account.headers, playerIds);
+
+  const filterPlayerIds = playerIds.filter(
+    (playerId) =>
+      !account.sendFriendRequestHistory.some(
+        (item) => item.playerId === playerId
+      )
+  );
+  if (filterPlayerIds.length > 0) {
+    await FriendClient.DeleteV1(account.headers, filterPlayerIds);
+  }
   await getFriendList(account);
 }
 

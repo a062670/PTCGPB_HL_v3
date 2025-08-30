@@ -234,7 +234,7 @@ io.on("connection", (socket) => {
   // 刪除好友
   socket.on("deleteFriend", async (data) => {
     console.log("收到 deleteFriend 請求");
-    await actions.doDeleteFriend(data.id, data.playerId);
+    await actions.doDeleteFriend(data.id, data.playerIds);
     await handleSocketEvent(socket, "deleteFriend", () => {
       return {};
     });

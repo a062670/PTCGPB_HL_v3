@@ -204,8 +204,8 @@ class SocketApiService {
   }
 
   // 刪除好友
-  async deleteFriend(accountId, playerId) {
-    return this.request("deleteFriend", { id: accountId, playerId });
+  async deleteFriend(accountId, playerIds) {
+    return this.request("deleteFriend", { id: accountId, playerIds });
   }
 
   // 刪除所有好友

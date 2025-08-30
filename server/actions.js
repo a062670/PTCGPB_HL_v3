@@ -214,12 +214,12 @@ exports.doGetFriendList = async (accountId) => {
   return await getFriendList(account);
 };
 
-exports.doDeleteFriend = async (accountId, playerId) => {
+exports.doDeleteFriend = async (accountId, playerIds) => {
   const account = accounts.find((acc) => acc.id === accountId);
   if (!account) {
     throw new Error("account not found");
   }
-  await deleteFriend(account, playerId);
+  await deleteFriend(account, playerIds);
   return;
 };
 
@@ -653,11 +653,11 @@ async function getFriendList(account) {
   return friendList;
 }
 
-async function deleteFriend(account, playerId) {
+async function deleteFriend(account, playerIds) {
   if (!account.headers["x-takasho-session-token"]) {
     throw new Error("請先登入！");
   }
-  await FriendClient.DeleteV1(account.headers, [playerId]);
+  await FriendClient.DeleteV1(account.headers, playerIds);
   await getFriendList(account);
 }
 

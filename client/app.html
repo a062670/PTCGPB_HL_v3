@@ -279,6 +279,28 @@
             更新神包
           </v-btn>
         </div>
+        <div class="d-flex ga-2 align-center">
+          <v-select
+            v-model="friendStore.filters.countOfStar"
+            :items="[2, 3, 4, 5]"
+            label="保留星數"
+            hide-details
+          />
+          <v-select
+            v-model="friendStore.filters.countOfNew"
+            :items="[0, 1, 2, 3, 4, 5]"
+            label="保留洞數"
+            hide-details
+          />
+        </div>
+        <div class="d-flex ga-2 align-center mt-2 mb-2 justify-center">
+          <v-btn
+            color="error"
+            @click="friendStore.clearFriendList(appStore.selectedAccount)"
+          >
+            清理好友
+          </v-btn>
+        </div>
         <div class="d-flex flex-column ga-2">
           <div
             v-for="friend in appStore.selectedAccount.friendList.friendsList"
@@ -289,7 +311,7 @@
               <v-btn
                 color="error"
                 :loading="friendStore.isLockFriendActions"
-                @click="friendStore.deleteFriend(appStore.selectedAccount, friend.playerId)"
+                @click="friendStore.deleteFriend(appStore.selectedAccount, [friend.playerId])"
               >
                 刪除
               </v-btn>

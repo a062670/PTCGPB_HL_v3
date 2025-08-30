@@ -78,8 +78,9 @@ async function loadTemplate() {
         // 載入帳號列表
         appStore.loadAccounts();
 
-        // 初始化戰鬥 Store
+        // 初始化 Store
         battleStore.init();
+        friendStore.init();
       });
 
       return {

@@ -26,10 +26,6 @@ export const useAppStore = defineStore("app", () => {
   const isSendFriendRequest = ref(false);
   const isFreeFeeding = ref(false);
   const isGettingPlayerResources = ref(false);
-  const isGettingFriendList = ref(false);
-  const isDeletingFriends = ref(false);
-  const isCancellingFriendRequest = ref(false);
-  const isRejectingFriendRequest = ref(false);
 
   // 計算屬性
   const selectedAccount = computed(() => {
@@ -169,42 +165,6 @@ export const useAppStore = defineStore("app", () => {
     isFreeFeeding.value = false;
   };
 
-  const getFriendList = async (account) => {
-    isGettingFriendList.value = true;
-    await socketApiService.getFriendList(account.id);
-    isGettingFriendList.value = false;
-  };
-
-  const deleteFriend = async (account, playerId) => {
-    isDeletingFriends.value = true;
-    await socketApiService.deleteFriend(account.id, playerId);
-    isDeletingFriends.value = false;
-  };
-
-  const deleteAllFriends = async (account) => {
-    isDeletingFriends.value = true;
-    const result = await socketApiService.deleteAllFriends(account.id);
-    updateAccount(account, result.data);
-    await socketApiService.getFriendList(account.id);
-    isDeletingFriends.value = false;
-  };
-
-  const cancelAllFriendRequest = async (account) => {
-    isCancellingFriendRequest.value = true;
-    const result = await socketApiService.cancelAllFriendRequest(account.id);
-    updateAccount(account, result.data);
-    await socketApiService.getFriendList(account.id);
-    isCancellingFriendRequest.value = false;
-  };
-
-  const rejectAllFriendRequest = async (account) => {
-    isRejectingFriendRequest.value = true;
-    const result = await socketApiService.rejectAllFriendRequest(account.id);
-    updateAccount(account, result.data);
-    await socketApiService.getFriendList(account.id);
-    isRejectingFriendRequest.value = false;
-  };
-
   const getGodPackList = async () => {
     const result = await socketApiService.getGodPackList();
     godPackList.value = result.data;
@@ -218,7 +178,7 @@ export const useAppStore = defineStore("app", () => {
         };
       });
     }
-    return null;
+    return [];
   };
 
   const selectAccount = (account) => {
@@ -255,10 +215,6 @@ export const useAppStore = defineStore("app", () => {
     isSendFriendRequest,
     isFreeFeeding,
     isGettingPlayerResources,
-    isGettingFriendList,
-    isDeletingFriends,
-    isCancellingFriendRequest,
-    isRejectingFriendRequest,
 
     // 計算屬性
     selectedAccount,
@@ -276,11 +232,6 @@ export const useAppStore = defineStore("app", () => {
     stopSendFriendRequest,
     startFreeFeed,
     stopFreeFeed,
-    getFriendList,
-    deleteFriend,
-    deleteAllFriends,
-    cancelAllFriendRequest,
-    rejectAllFriendRequest,
     getGodPackList,
     findGodPack,
     selectAccount,

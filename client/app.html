@@ -113,11 +113,11 @@
           <v-btn
             v-if="account.isLogin"
             color="info"
-            :loading="appStore.isGettingFriendList"
+            :loading="friendStore.isLockFriendActions"
             @click="
               appStore.showType = 'friendList';
               appStore.selectAccount(account);
-              appStore.getFriendList(account);
+              friendStore.getFriendList(account);
               appStore.getGodPackList();
             "
           >
@@ -126,24 +126,24 @@
           <v-btn
             v-if="account.isLogin"
             color="warning"
-            :loading="appStore.isDeletingFriends"
-            @click="appStore.deleteAllFriends(account)"
+            :loading="friendStore.isLockFriendActions"
+            @click="friendStore.deleteAllFriends(account)"
           >
             刪除好友
           </v-btn>
           <v-btn
             v-if="account.isLogin"
             color="warning"
-            :loading="appStore.isCancellingFriendRequest"
-            @click="appStore.cancelAllFriendRequest(account)"
+            :loading="friendStore.isLockFriendActions"
+            @click="friendStore.cancelAllFriendRequest(account)"
           >
             取消申請
           </v-btn>
           <v-btn
             v-if="account.isLogin"
             color="warning"
-            :loading="appStore.isRejectingFriendRequest"
-            @click="appStore.rejectAllFriendRequest(account)"
+            :loading="friendStore.isLockFriendActions"
+            @click="friendStore.rejectAllFriendRequest(account)"
           >
             拒絕申請
           </v-btn>
@@ -288,8 +288,8 @@
               <div>{{ friend.profile.nickname }}</div>
               <v-btn
                 color="error"
-                :loading="appStore.isDeletingFriends"
-                @click="appStore.deleteFriend(appStore.selectedAccount, friend.playerId)"
+                :loading="friendStore.isLockFriendActions"
+                @click="friendStore.deleteFriend(appStore.selectedAccount, friend.playerId)"
               >
                 刪除
               </v-btn>

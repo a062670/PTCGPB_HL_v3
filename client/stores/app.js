@@ -191,7 +191,6 @@ export const useAppStore = defineStore("app", () => {
 
   const updateAccount = (account, newAccount) => {
     for (const key in newAccount) {
-      console.log(key, newAccount[key]);
       account[key] = newAccount[key];
     }
     account.lastUpdateAt = new Date().toLocaleString();

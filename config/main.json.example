@@ -14,7 +14,7 @@
     "password": ""
   },
   "proxyList": [
-    "",
+    ""
   ],
   "auth": {
     "enable": false,

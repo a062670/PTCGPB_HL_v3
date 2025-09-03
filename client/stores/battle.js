@@ -125,6 +125,7 @@ export const useBattleStore = defineStore("battle", () => {
     soundBattle.value.play();
 
     await startEventBattle(account, battleId);
+    await sleep(Math.random() * 10 + 41000);
     await finishEventBattle(
       account,
       battleId,
@@ -173,7 +174,7 @@ export const useBattleStore = defineStore("battle", () => {
     soundBattle.value.play();
 
     await startStepupBattle(account, battleId);
-    await sleep(41000);
+    await sleep(Math.random() * 10 + 41000);
     await finishStepupBattle(
       account,
       battleId,

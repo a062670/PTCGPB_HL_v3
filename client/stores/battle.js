@@ -24,6 +24,7 @@ export const useBattleStore = defineStore("battle", () => {
   const difficulty = ref(null);
   const lastBattleId = ref(null);
 
+  const isShowWarning = ref(true);
   const isGettingInfo = ref(false);
   const isBattleRunning = ref(false);
 
@@ -68,6 +69,10 @@ export const useBattleStore = defineStore("battle", () => {
   const stopSound = () => {
     soundBattle.value.pause();
     soundBattleFinish.value.pause();
+  };
+
+  const hideWarning = () => {
+    isShowWarning.value = false;
   };
 
   const getInfo = async (account) => {
@@ -228,6 +233,7 @@ export const useBattleStore = defineStore("battle", () => {
     difficulty,
     lastBattleId,
     isBattleRunning,
+    isShowWarning,
 
     // 計算屬性
     packOptions,
@@ -237,6 +243,7 @@ export const useBattleStore = defineStore("battle", () => {
     init,
     setVolume,
     stopSound,
+    hideWarning,
     getInfo,
     runEventBattle,
     runStepupBattle,

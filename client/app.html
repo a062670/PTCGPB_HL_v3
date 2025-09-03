@@ -571,7 +571,14 @@
           </div>
         </div>
         <div class="my-2">一般戰鬥 - 上次: {{ battleStore.lastBattleId }}</div>
-        <div class="d-flex ga-2 align-center">
+        <div v-if="battleStore.isShowWarning">
+          <div>
+            注意:
+            戰鬥會到致部分資料異常，雖目前好像不會有什麼影響，但不確定未來會不會有狀況，請謹慎使用。
+          </div>
+          <v-btn color="error" @click="battleStore.hideWarning">接受風險</v-btn>
+        </div>
+        <div v-if="!battleStore.isShowWarning" class="d-flex ga-2 align-center">
           <v-select
             v-model="battleStore.pack"
             :items="battleStore.packOptions"

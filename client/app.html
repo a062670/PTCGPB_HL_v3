@@ -555,7 +555,10 @@
               自動回復: {{ battleStore.eventPower.eventPower.nextAutoHealedAt }}
             </div>
           </div>
-          <div class="d-flex ga-2 align-center">
+          <div
+            v-if="battleStore.eventPower.eventPower.amount >= 1"
+            class="d-flex ga-2 align-center"
+          >
             <v-btn
               v-for="eventId in battleStore.eventPower.event.ids"
               :key="eventId"

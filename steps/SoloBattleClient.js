@@ -85,7 +85,7 @@ const FinishStepupBattleV1 = async (
   } else if (soloStepupBattleId.startsWith("INTERMEDIATE")) {
     currentCountSetting = [2, 1, 1];
   } else if (soloStepupBattleId.startsWith("ADVANCED")) {
-    currentCountSetting = [1, 100, 1, 1];
+    currentCountSetting = [2, 100, 1, 1];
   } else if (soloStepupBattleId.startsWith("EXPERT")) {
     currentCountSetting = [1, 1, 1, 1, 1500];
   }

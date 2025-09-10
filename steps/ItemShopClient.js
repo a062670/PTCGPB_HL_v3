@@ -6,38 +6,30 @@ const ItemShopGetPurchaseSummariesV1Proto = require("../generated/takasho/schema
 const ProductTypeProto = require("../generated/takasho/schema/lettuce_server/resource/item_shop/product_type_pb.js");
 const PokeGoldProto = require("../generated/takasho/schema/lettuce_server/resource/item/poke_gold_pb.js");
 
-const transactionId = createUuidV4(); // 用固定transactionId可以過 速度比較快
-
 const PurchaseV1 = async (headers, productId, ticketAmount, times = 1) => {
-  const bytes = getCachedBytes(
-    ["ItemShop/PurchaseV1", productId, ticketAmount, times],
-    () => {
-      const request =
-        new ItemShopPurchaseProto.ItemShopPurchaseV1.Types.Request();
-      request.setShopId("SHOP");
-      request.setProductId(productId);
-      request.setTransactionId(transactionId);
-      request.setAmount(times);
+  const transactionId = createUuidV4();
+  const request = new ItemShopPurchaseProto.ItemShopPurchaseV1.Types.Request();
+  request.setShopId("SHOP");
+  request.setProductId(productId);
+  request.setTransactionId(transactionId);
+  request.setAmount(times);
 
-      if (ticketAmount) {
-        const currency = new CurrencyProto.Currency();
-        currency.setType(CurrencyProto.Currency.Types.Type.TYPE_SHOP_TICKET);
-        currency.setAmount(times * ticketAmount);
-        request.setCurrenciesList([currency]);
-      } else {
-        request.setCurrenciesList([]);
-      }
+  if (ticketAmount) {
+    const currency = new CurrencyProto.Currency();
+    currency.setType(CurrencyProto.Currency.Types.Type.TYPE_SHOP_TICKET);
+    currency.setAmount(times * ticketAmount);
+    request.setCurrenciesList([currency]);
+  } else {
+    request.setCurrenciesList([]);
+  }
 
-      const pokeGold = new PokeGoldProto.PokeGold();
-      // pokeGold.setPaid(false);
-      pokeGold.setAmount(0);
+  const pokeGold = new PokeGoldProto.PokeGold();
+  // pokeGold.setPaid(false);
+  pokeGold.setAmount(0);
 
-      request.setPokeGoldsList([pokeGold]);
+  request.setPokeGoldsList([pokeGold]);
 
-      const bytes = request.serializeBinary();
-      return bytes;
-    }
-  );
+  const bytes = request.serializeBinary();
 
   await Grpc.sendGrpcRequest("ItemShop/PurchaseV1", headers, bytes, false);
   return;

@@ -475,6 +475,15 @@ exports.doGetGodPackList = async () => {
   return godPackList;
 };
 
+/** 取得其他玩家資料 */
+exports.doGetOtherPlayerProfile = async (accountId, playerId) => {
+  const account = accounts.find((acc) => acc.id === accountId);
+  if (!account) {
+    throw new Error("account not found");
+  }
+  return await getOtherPlayerProfile(account, playerId);
+};
+
 // 清理函數
 exports.cleanup = () => {
   console.log("🧹 正在清理actions資源...");
@@ -571,6 +580,17 @@ async function getProfile(account) {
     /-/g,
     ""
   );
+}
+
+async function getOtherPlayerProfile(account, playerId) {
+  if (!account.headers["x-takasho-session-token"]) {
+    throw new Error("請先登入！");
+  }
+  const profileResponse = await PlayerProfileClient.OtherPlayerProfileV1(
+    account.headers,
+    playerId
+  );
+  return profileResponse.data;
 }
 
 async function getPlayerResources(account) {
@@ -792,6 +812,7 @@ async function getFeedList(account) {
     .map((feed) => ({
       someoneFeedId: feed.someoneFeedId,
       nickname: feed.player.nickname,
+      playerId: feed.player.playerId,
       cardsList: feed.contents.cardsList,
       isFriend: feed.player.isFriend,
       challengeInfo: feed.challengeInfo,

@@ -1,6 +1,7 @@
 const Grpc = require("../lib/Grpc.js");
 
 const SaveMyProfileProto = require("../generated/takasho/schema/lettuce_server/player_api/save_my_profile_v1_pb.js");
+const OtherPlayerProfileProto = require("../generated/takasho/schema/lettuce_server/player_api/other_player_profile_v1_pb.js");
 const MyProfileProto = require("../generated/takasho/schema/lettuce_server/player_api/my_profile_v1_pb.js");
 
 const SaveMyProfileV1 = async (
@@ -24,6 +25,27 @@ const SaveMyProfileV1 = async (
   );
 
   return;
+};
+
+const OtherPlayerProfileV1 = async (headers, playerId) => {
+  const request =
+    new OtherPlayerProfileProto.OtherPlayerProfileV1.Types.Request();
+  request.setPlayerId(playerId);
+  const bytes = request.serializeBinary();
+  const result = await Grpc.sendGrpcRequest(
+    "PlayerProfile/OtherPlayerProfileV1",
+    headers,
+    bytes
+  );
+  const resultBody =
+    OtherPlayerProfileProto.OtherPlayerProfileV1.Types.Response.deserializeBinary(
+      await result.body
+    );
+  const body = resultBody.toObject();
+  return {
+    data: body,
+    headers: result.headers,
+  };
 };
 
 const MyProfileV1 = async (headers) => {
@@ -50,5 +72,6 @@ const MyProfileV1 = async (headers) => {
 
 module.exports = {
   SaveMyProfileV1,
+  OtherPlayerProfileV1,
   MyProfileV1,
 };

@@ -525,6 +525,18 @@ io.on("connection", (socket) => {
     });
   });
 
+  // 取得其他玩家資料
+  socket.on("getOtherPlayerProfile", async (data) => {
+    console.log("收到 getOtherPlayerProfile 請求");
+    const otherPlayerProfile = await actions.doGetOtherPlayerProfile(
+      data.id,
+      data.playerId
+    );
+    await handleSocketEvent(socket, "getOtherPlayerProfile", () => {
+      return otherPlayerProfile;
+    });
+  });
+
   // 斷線處理
   socket.on("disconnect", () => {
     console.log("客戶端已斷線:", socket.id);

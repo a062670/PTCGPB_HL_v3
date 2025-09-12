@@ -310,6 +310,12 @@
             <div class="d-flex ga-2 align-center">
               <div>{{ friend.profile.nickname }}</div>
               <v-btn
+                color="primary"
+                @click="appStore.getOtherPlayerProfile(appStore.selectedAccount, friend.playerId)"
+              >
+                資訊
+              </v-btn>
+              <v-btn
                 color="error"
                 :loading="friendStore.isLockFriendActions"
                 @click="friendStore.deleteFriend(appStore.selectedAccount, [friend.playerId])"
@@ -363,6 +369,12 @@
           <div class="d-flex ga-2 align-center">
             <div>({{ feed.challengeInfo.requireFeedStamina }}力)</div>
             <div>{{ feed.nickname }}</div>
+            <v-btn
+              color="primary"
+              @click="appStore.getOtherPlayerProfile(appStore.selectedAccount, feed.playerId)"
+            >
+              資訊
+            </v-btn>
           </div>
           <div v-if="feed.disable">已抽</div>
           <div v-else-if="feed.challengeInfo.endAt.seconds * 1000 < Date.now()">
@@ -644,5 +656,55 @@
         </div>
       </div>
     </v-container>
+    <v-dialog v-model="appStore.otherPlayerProfile.isShowing" width="auto">
+      <v-card max-width="400" prepend-icon="mdi-account" title="玩家資訊">
+        <div class="px-4">
+          <div>
+            {{appStore.otherPlayerProfile.profile.profile.profileSpine.nickname}}
+            <span>
+              (LV:{{
+              appStore.otherPlayerProfile.profile.profile.profileSpine.playerLevel
+              }})
+            </span>
+          </div>
+          <div>
+            ID:
+            <span>
+              {{appStore.otherPlayerProfile.profile.profile.profileSpine.friendId}}
+            </span>
+          </div>
+          <div>
+            lastLoggedInAt:
+            <span>
+              {{appStore.otherPlayerProfile.profile.profile.profileSpine.lastLoggedInAt.seconds}}
+            </span>
+          </div>
+          <div class="mt-2">
+            卡片:
+            <span>
+              {{ appStore.otherPlayerProfile.profile.profile.numberOfCards}}
+            </span>
+          </div>
+          <div class="mt-2">對戰紀錄:</div>
+          <div>
+            勝利:{{
+            appStore.otherPlayerProfile.profile.profile.battleRecordSummary.totalWinCount
+            }} / 傷害:{{
+            appStore.otherPlayerProfile.profile.profile.battleRecordSummary.maxDamage
+            }} / 得分:{{
+            appStore.otherPlayerProfile.profile.profile.battleRecordSummary.totalAcquiredPoint
+            }}
+          </div>
+        </div>
+        <template v-slot:actions>
+          <v-btn
+            color="error"
+            @click="appStore.otherPlayerProfile.isShowing = false"
+          >
+            關閉
+          </v-btn>
+        </template>
+      </v-card>
+    </v-dialog>
   </v-main>
 </v-app>

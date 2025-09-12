@@ -389,6 +389,11 @@ class SocketApiService {
   async getGodPackList() {
     return this.request("getGodPackList", {});
   }
+
+  // 取得其他玩家資料
+  async getOtherPlayerProfile(accountId, playerId) {
+    return this.request("getOtherPlayerProfile", { id: accountId, playerId });
+  }
 }
 
 // 建立全域 Socket API 服務實例

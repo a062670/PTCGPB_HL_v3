@@ -1,7 +1,7 @@
 import socketApiService from "../api.js";
 import toastService from "../toast.js";
 
-const { ref, computed } = Vue;
+const { ref, reactive, computed } = Vue;
 const { defineStore } = Pinia;
 
 // 應用程式主要 Store
@@ -20,12 +20,17 @@ export const useAppStore = defineStore("app", () => {
   // 資料相關
   const showType = ref("");
   const godPackList = ref([]);
+  const otherPlayerProfile = reactive({
+    isShowing: false,
+    profile: null,
+  });
 
   const isLoggingIn = ref(false);
   const isApproving = ref(false);
   const isSendFriendRequest = ref(false);
   const isFreeFeeding = ref(false);
   const isGettingPlayerResources = ref(false);
+  const isGettingOtherPlayerProfile = ref(false);
 
   // 計算屬性
   const selectedAccount = computed(() => {
@@ -196,6 +201,17 @@ export const useAppStore = defineStore("app", () => {
     account.lastUpdateAt = new Date().toLocaleString();
   };
 
+  const getOtherPlayerProfile = async (account, playerId) => {
+    isGettingOtherPlayerProfile.value = true;
+    const result = await socketApiService.getOtherPlayerProfile(
+      account.id,
+      playerId
+    );
+    otherPlayerProfile.profile = result.data;
+    otherPlayerProfile.isShowing = true;
+    isGettingOtherPlayerProfile.value = false;
+  };
+
   return {
     // 狀態
     title,
@@ -208,12 +224,14 @@ export const useAppStore = defineStore("app", () => {
 
     showType,
     godPackList,
+    otherPlayerProfile,
 
     isLoggingIn,
     isApproving,
     isSendFriendRequest,
     isFreeFeeding,
     isGettingPlayerResources,
+    isGettingOtherPlayerProfile,
 
     // 計算屬性
     selectedAccount,
@@ -235,5 +253,6 @@ export const useAppStore = defineStore("app", () => {
     findGodPack,
     selectAccount,
     clearSelectedAccount,
+    getOtherPlayerProfile,
   };
 });

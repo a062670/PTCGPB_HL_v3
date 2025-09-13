@@ -301,6 +301,12 @@
           >
             清理好友
           </v-btn>
+          <v-btn
+            :color="friendStore.clearFriendListInterval ? 'primary' : 'gray'"
+            @click="friendStore.toggleClearFriendListInterval(appStore.selectedAccount)"
+          >
+            定期清({{friendStore.clearFriendListInterval ? '開' : '關'}})
+          </v-btn>
         </div>
         <div class="d-flex flex-column ga-2">
           <div

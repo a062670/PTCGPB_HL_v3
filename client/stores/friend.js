@@ -19,6 +19,8 @@ export const useFriendStore = defineStore("friend", () => {
 
   const isLockFriendActions = ref(false);
 
+  const clearFriendListInterval = ref(null);
+
   const init = () => {
     const localFilters =
       JSON.parse(localStorage.getItem("friendFilters")) || {};
@@ -105,9 +107,25 @@ export const useFriendStore = defineStore("friend", () => {
     isLockFriendActions.value = false;
   };
 
+  /** 切換定期清理好友 */
+  const toggleClearFriendListInterval = async (account) => {
+    if (clearFriendListInterval.value) {
+      clearInterval(clearFriendListInterval.value);
+      clearFriendListInterval.value = null;
+      toastService.success("定期清理好友關閉");
+    } else {
+      // 5分鐘
+      clearFriendListInterval.value = setInterval(() => {
+        clearFriendList(account);
+      }, 1000 * 60 * 5);
+      toastService.success("定期清理好友開啟");
+    }
+  };
+
   return {
     filters,
     isLockFriendActions,
+    clearFriendListInterval,
 
     init,
     getFriendList,
@@ -116,5 +134,6 @@ export const useFriendStore = defineStore("friend", () => {
     cancelAllFriendRequest,
     rejectAllFriendRequest,
     clearFriendList,
+    toggleClearFriendListInterval,
   };
 });

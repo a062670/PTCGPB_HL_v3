@@ -76,6 +76,7 @@ export const useFriendStore = defineStore("friend", () => {
     }
     const friendList = await socketApiService.getFriendList(account.id);
     const playerIds = [];
+    await appStore.getGodPackList();
     for (const friend of friendList.data.data.friendsList) {
       const cards = appStore.findGodPack(friend.playerId);
       let countOfStar = 0;
